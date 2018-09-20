@@ -11,6 +11,9 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, "helpermapa.db", null, 1);
     }
 
+    public static final String TABLA_RUTAS = "rutas";
+    public static final String TABLA_RUTA_POSICION = "ruta_posicion";
+    public static final String TABLA_INTERCEPCION_RUTAS = "intercepciones_rutas";
     public static final String TABLA_POSICIONES = "posiciones";
     public static final String TABLA_IMAGENES = "imagenes";
     public static final String TABLA_ZONAS = "zonas";
@@ -22,6 +25,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TABLA_IMAGEN_POSICION = "imagen_posicion";
 
     public static final String ID = "id";
+    public static final String ID_RUTA = "id_ruta";
+    public static final String ID_RUTA_1 = "id_ruta_1";
+    public static final String ID_RUTA_2 = "id_ruta_2";
     public static final String ID_POSICION = "id_posicion";
     public static final String ID_ZONA = "id_zona";
     public static final String ID_BLOQUE = "id_bloque";
@@ -38,10 +44,31 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        String CREAR_TABLA_RUTAS = "CREATE TABLE "+TABLA_RUTAS +" ( " +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                NOMBRE + " TEXT NOT NULL " +
+                ");";
+
         String CREAR_TABLA_POSICIONES = "CREATE TABLE "+TABLA_POSICIONES+" ( " +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 LATITUD + " DOUBLE NOT NULL, " +
                 LONGITUD + " DOUBLE NOT NULL " +
+                ");";
+
+        String CREAR_TABLA_RUTA_POSICION = "CREATE TABLE "+TABLA_RUTA_POSICION+" ( " +
+                ID_POSICION + " INTEGER NOT NULL, " +
+                ID_RUTA + " INTEGER NOT NULL, " +
+                "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+"), " +
+                "FOREIGN KEY("+ID_RUTA+") REFERENCES "+TABLA_RUTAS+"("+ID+") " +
+                ");";
+
+        String CREAR_TABLA_INTERCEPCION_RUTAS = "CREATE TABLE "+TABLA_INTERCEPCION_RUTAS+" ( " +
+                ID_RUTA_1 + " INTEGER NOT NULL, " +
+                ID_RUTA_2 + " INTEGER NOT NULL, " +
+                ID_POSICION + " INTEGER NOT NULL, " +
+                "FOREIGN KEY("+ID_RUTA_1+") REFERENCES "+TABLA_RUTAS+"("+ID+"), " +
+                "FOREIGN KEY("+ID_RUTA_2+") REFERENCES "+TABLA_RUTAS+"("+ID+"), " +
+                "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
                 ");";
 
         String CREAR_TABLA_IMAGENES = "CREATE TABLE "+TABLA_IMAGENES+" ( " +
@@ -104,7 +131,10 @@ public class DBHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY("+ID_BLOQUE+") REFERENCES "+TABLA_BLOQUES+"("+ID+") " +
                 ");";
 
+        db.execSQL(CREAR_TABLA_RUTAS);
         db.execSQL(CREAR_TABLA_POSICIONES);
+        db.execSQL(CREAR_TABLA_RUTA_POSICION);
+        db.execSQL(CREAR_TABLA_INTERCEPCION_RUTAS);
         db.execSQL(CREAR_TABLA_IMAGENES);
         db.execSQL(CREAR_TABLA_ZONA);
         db.execSQL(CREAR_TABLA_BLOQUE);
