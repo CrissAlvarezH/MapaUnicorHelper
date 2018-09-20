@@ -39,70 +39,80 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREAR_TABLA_POSICIONES = "CREATE TABLE "+TABLA_POSICIONES+" ( " +
-                ID + " INTEGER AUTOINCREMENT PRIMARY KEY," +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 LATITUD + " DOUBLE NOT NULL, " +
                 LONGITUD + " DOUBLE NOT NULL " +
                 ");";
 
         String CREAR_TABLA_IMAGENES = "CREATE TABLE "+TABLA_IMAGENES+" ( " +
-                ID + " INTEGER AUTOINCREMENT PRIMARY KEY," +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 URL + " TEXT NOT NULL, " +
                 FECHA_TOMADA + " TEXT NOT NULL, " +
                 ID_POSICION + " INTEGER NOT NULL, " +
-                "FOREIGN KEY("+ID_POSICION+") REFERENCER "+TABLA_POSICIONES+"("+ID+") " +
+                "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
                 ");";
 
         String CREAR_TABLA_ZONA = "CREATE TABLE "+TABLA_ZONAS+" ( " +
-                ID + " INTEGER AUTOINCREMENT PRIMARY KEY," +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 NOMBRE + " TEXT NOT NULL " +
                 ");";
 
         String CREAR_TABLA_BLOQUE = "CREATE TABLE "+TABLA_BLOQUES+" ( " +
-                ID + " INTEGER AUTOINCREMENT PRIMARY KEY," +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 NOMBRE + " TEXT NOT NULL, " +
                 CODIGO + " TEXT NOT NULL, " +
                 ID_ZONA + " INTEGER NOT NULL, " +
-                "FOREIGN KEY("+ID_ZONA+") REFERENCER "+TABLA_POSICIONES+"("+ID+") " +
+                ID_POSICION + " INTEGER NOT NULL, " +
+                "FOREIGN KEY("+ID_ZONA+") REFERENCES "+TABLA_ZONAS+"("+ID+"), " +
+                "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
                 ");";
 
         String CREAR_TABLA_SALONES = "CREATE TABLE "+TABLA_SALONES+" ( " +
-                ID + " INTEGER AUTOINCREMENT PRIMARY KEY," +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 NOMBRE + " TEXT NOT NULL, " +
                 CODIGO + " TEXT NOT NULL, " +
                 ID_BLOQUE + " INTEGER NOT NULL, " +
-                "FOREIGN KEY("+ID_BLOQUE+") REFERENCER "+TABLA_BLOQUES+"("+ID+") " +
+                "FOREIGN KEY("+ID_BLOQUE+") REFERENCES "+TABLA_BLOQUES+"("+ID+") " +
                 ");";
 
         String CREAR_TABLA_IMAGEN_BLOQUE = "CREATE TABLE "+TABLA_IMAGEN_BLOQUE+" ( " +
                 ID_IMAGEN + " INTEGER NOT NULL, " +
                 ID_BLOQUE + " INTEGER NOT NULL, " +
-                "FOREIGN KEY("+ID_IMAGEN+") REFERENCER "+TABLA_IMAGENES+"("+ID+"), " +
-                "FOREIGN KEY("+ID_BLOQUE+") REFERENCER "+TABLA_BLOQUES+"("+ID+") " +
+                "FOREIGN KEY("+ID_IMAGEN+") REFERENCES "+TABLA_IMAGENES+"("+ID+"), " +
+                "FOREIGN KEY("+ID_BLOQUE+") REFERENCES "+TABLA_BLOQUES+"("+ID+") " +
                 ");";
 
         String CREAR_TABLA_IMAGEN_SALON = "CREATE TABLE "+TABLA_IMAGEN_SALON+" ( " +
                 ID_IMAGEN + " INTEGER NOT NULL, " +
                 ID_SALON + " INTEGER NOT NULL, " +
-                "FOREIGN KEY("+ID_IMAGEN+") REFERENCER "+TABLA_IMAGENES+"("+ID+"), " +
-                "FOREIGN KEY("+ID_SALON+") REFERENCER "+TABLA_SALONES+"("+ID+") " +
+                "FOREIGN KEY("+ID_IMAGEN+") REFERENCES "+TABLA_IMAGENES+"("+ID+"), " +
+                "FOREIGN KEY("+ID_SALON+") REFERENCES "+TABLA_SALONES+"("+ID+") " +
                 ");";
 
         String CREAR_TABLA_IMAGEN_POSICION = "CREATE TABLE "+TABLA_IMAGEN_POSICION+" ( " +
                 ID_IMAGEN + " INTEGER NOT NULL, " +
                 ID_POSICION + " INTEGER NOT NULL, " +
                 ORIENTACION + " TEXT NOT NULL, " +
-                "FOREIGN KEY("+ID_IMAGEN+") REFERENCER "+TABLA_IMAGENES+"("+ID+"), " +
-                "FOREIGN KEY("+ID_POSICION+") REFERENCER "+TABLA_POSICIONES+"("+ID+") " +
+                "FOREIGN KEY("+ID_IMAGEN+") REFERENCES "+TABLA_IMAGENES+"("+ID+"), " +
+                "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
                 ");";
 
         String CREAR_TABLA_POSICION_BLOQUE = "CREATE TABLE "+TABLA_POSICION_BLOQUE+" ( " +
                 ID_POSICION + " INTEGER NOT NULL, " +
                 ID_BLOQUE + " INTEGER NOT NULL, " +
-                "FOREIGN KEY("+ID_POSICION+") REFERENCER "+TABLA_POSICIONES+"("+ID+"), " +
-                "FOREIGN KEY("+ID_BLOQUE+") REFERENCER "+TABLA_BLOQUES+"("+ID+") " +
+                "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+"), " +
+                "FOREIGN KEY("+ID_BLOQUE+") REFERENCES "+TABLA_BLOQUES+"("+ID+") " +
                 ");";
 
-        // TODO tablas completas (creo), terminar de ejecutar los create table
+        db.execSQL(CREAR_TABLA_POSICIONES);
+        db.execSQL(CREAR_TABLA_IMAGENES);
+        db.execSQL(CREAR_TABLA_ZONA);
+        db.execSQL(CREAR_TABLA_BLOQUE);
+        db.execSQL(CREAR_TABLA_SALONES);
+        db.execSQL(CREAR_TABLA_IMAGEN_BLOQUE);
+        db.execSQL(CREAR_TABLA_IMAGEN_SALON);
+        db.execSQL(CREAR_TABLA_IMAGEN_POSICION);
+        db.execSQL(CREAR_TABLA_POSICION_BLOQUE);
     }
 
     @Override
