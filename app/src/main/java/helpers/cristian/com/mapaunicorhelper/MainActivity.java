@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import java.util.ArrayList;
 
 import helpers.cristian.com.mapaunicorhelper.fragmentos.BloquesFragment;
+import helpers.cristian.com.mapaunicorhelper.fragmentos.RutasFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
         viewPager = findViewById(R.id.pager);
         tabs = findViewById(R.id.tabs);
-        toolbar = findViewById(R.id.toolbar_main);
-        setSupportActionBar(toolbar);
+//        toolbar = findViewById(R.id.toolbar_main);
+//        setSupportActionBar(toolbar);
 
         agregarFragmentosToTabs(viewPager, tabs);
     }
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         pagerAdaptador = new PagerAdaptador(getSupportFragmentManager());
 
         pagerAdaptador.agregarFragment(new BloquesFragment(), "BLOQUES");
-        pagerAdaptador.agregarFragment(new BloquesFragment(), "RUTAS");
+        pagerAdaptador.agregarFragment(new RutasFragment(), "RUTAS");
         pagerAdaptador.agregarFragment(new BloquesFragment(), "MAPA");
 
         viewPager.setAdapter(pagerAdaptador);
