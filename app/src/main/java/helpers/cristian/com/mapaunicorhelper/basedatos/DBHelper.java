@@ -40,6 +40,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String NOMBRE = "nombre";
     public static final String CODIGO = "codigo";
     public static final String ORIENTACION = "orientacion";
+    public static final String PISO = "piso";
 
 
     @Override
@@ -98,6 +99,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 NOMBRE + " TEXT NOT NULL, " +
                 CODIGO + " TEXT NOT NULL, " +
+                PISO + " INTEGER NOT NULL, " +
                 ID_BLOQUE + " INTEGER NOT NULL, " +
                 "FOREIGN KEY("+ID_BLOQUE+") REFERENCES "+TABLA_BLOQUES+"("+ID+") " +
                 ");";

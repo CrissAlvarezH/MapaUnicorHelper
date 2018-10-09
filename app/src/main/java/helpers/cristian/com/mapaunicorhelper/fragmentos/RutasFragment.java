@@ -3,6 +3,7 @@ package helpers.cristian.com.mapaunicorhelper.fragmentos;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import helpers.cristian.com.mapaunicorhelper.MainActivity;
 import helpers.cristian.com.mapaunicorhelper.R;
@@ -75,6 +77,20 @@ public class RutasFragment extends Fragment implements OnMapReadyCallback, View.
 
         ( (MainActivity) getContext()).agregarListenerPosicion(this);
 
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            new FusedLocationProviderClient(getContext()).getLastLocation()
+                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if( location != null )
+                                establecerPosicion(new LatLng(location.getLatitude(), location.getLongitude()));
+                        }
+                    });
+        }
+
         return vista;
     }
 
@@ -100,16 +116,19 @@ public class RutasFragment extends Fragment implements OnMapReadyCallback, View.
 
     @Override
     public void cambioPosicion(LatLng posicion) {
+        establecerPosicion(posicion);
+    }
 
+    private void establecerPosicion(LatLng pos){
         if( mapa != null) {
             if (miMarker != null) {
-                miMarker.setPosition(posicion);
+                miMarker.setPosition(pos);
                 return;
             }
 
-            miMarker = mapa.addMarker(new MarkerOptions().title("Mi posición").position(posicion));
+            miMarker = mapa.addMarker(new MarkerOptions().title("Mi posición").position(pos));
 
-            mapa.moveCamera(CameraUpdateFactory.newLatLngZoom(posicion, 15));
+            mapa.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
             progress.setVisibility(View.GONE);
         }
     }

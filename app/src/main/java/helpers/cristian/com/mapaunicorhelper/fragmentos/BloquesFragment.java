@@ -1,14 +1,21 @@
 package helpers.cristian.com.mapaunicorhelper.fragmentos;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -18,7 +25,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
+import helpers.cristian.com.mapaunicorhelper.AddBloqueActivity;
 import helpers.cristian.com.mapaunicorhelper.MainActivity;
 import helpers.cristian.com.mapaunicorhelper.R;
 
@@ -35,7 +44,10 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
     private MapView mapView;
     private ProgressBar progress;
 
-    public BloquesFragment() {}
+    private LatLng posActual;
+
+    public BloquesFragment() {
+    }
 
     @Override
     public void onResume() {
@@ -50,6 +62,7 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
 
         View vista = inflater.inflate(R.layout.fragment_bloques, container, false);
         miMarker = null;
+        posActual = null;
 
         progress = vista.findViewById(R.id.progress_bloques);
         fabAddBloque = vista.findViewById(R.id.fab_add_bloque);
@@ -60,9 +73,22 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
 
         mapView.getMapAsync(this);
 
-        ( (MainActivity) getContext()).agregarListenerPosicion(this);
+        ((MainActivity) getContext()).agregarListenerPosicion(this);
 
-        Log.v(TAG, "onCreateView");
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            new FusedLocationProviderClient(getContext()).getLastLocation()
+                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if(location != null)
+                                establecerPosicion(new LatLng(location.getLatitude(), location.getLongitude()));
+                        }
+                    });
+        }
+
 
         return vista;
     }
@@ -78,6 +104,13 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.fab_add_bloque:
+                if(posActual != null){
+                    startActivity(
+                            new Intent(getContext(), AddBloqueActivity.class).putExtra("pos", posActual)
+                    );
+                }else{
+                    Toast.makeText(getContext(), "Aún no se ha cargado la posición", Toast.LENGTH_SHORT).show();
+                }
 
                 break;
         }
@@ -85,17 +118,21 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
 
     @Override
     public void cambioPosicion(LatLng posicion) {
-        Log.v(TAG, "Cambio de posicion, mapa: "+mapa+", marker: "+miMarker);
+        establecerPosicion(posicion);
+    }
+
+    private void establecerPosicion(LatLng pos){
+        posActual = pos;
 
         if( mapa != null) {
             if (miMarker != null) {
-                miMarker.setPosition(posicion);
+                miMarker.setPosition(pos);
                 return;
             }
 
-            miMarker = mapa.addMarker(new MarkerOptions().title("Mi posición").position(posicion));
+            miMarker = mapa.addMarker(new MarkerOptions().title("Mi posición").position(pos));
 
-            mapa.moveCamera(CameraUpdateFactory.newLatLngZoom(posicion, 15));
+            mapa.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
             progress.setVisibility(View.GONE);
         }
     }
@@ -106,6 +143,5 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
         mapView.onDestroy();
 
         ( (MainActivity) getContext()).removerListenerPosicion(this);
-        Log.v(TAG, "onDestroyView");
     }
 }

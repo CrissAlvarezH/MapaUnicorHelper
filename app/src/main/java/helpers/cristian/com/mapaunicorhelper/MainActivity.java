@@ -160,7 +160,6 @@ public class MainActivity extends FragmentActivity {
                 layoutPosNoDisp.setVisibility(View.GONE);
 
             for(ListenerPosiciones listener : listenerPosiciones){
-                Log.v(TAG, "listener "+listener);
 
                 if(listener != null) {
                     listener.cambioPosicion(
