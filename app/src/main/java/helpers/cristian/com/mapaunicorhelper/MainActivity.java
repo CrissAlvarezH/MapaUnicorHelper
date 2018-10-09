@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -30,8 +32,10 @@ import java.util.ArrayList;
 
 import helpers.cristian.com.mapaunicorhelper.fragmentos.BloquesFragment;
 import helpers.cristian.com.mapaunicorhelper.fragmentos.RutasFragment;
+import helpers.cristian.com.mapaunicorhelper.fragmentos.SalonesFragment;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
+    private final String TAG = "ActividadMain";
     private int codPermisos = 4324;
 
     private PagerAdaptador pagerAdaptador;
@@ -93,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
         pagerAdaptador.agregarFragment(new BloquesFragment(), "BLOQUES");
         pagerAdaptador.agregarFragment(new RutasFragment(), "RUTAS");
-        pagerAdaptador.agregarFragment(new BloquesFragment(), "MAPA");
+        pagerAdaptador.agregarFragment(new SalonesFragment(), "MAPA");
 
         viewPager.setAdapter(pagerAdaptador);
         tabs.setupWithViewPager(viewPager);
@@ -156,12 +160,16 @@ public class MainActivity extends AppCompatActivity {
                 layoutPosNoDisp.setVisibility(View.GONE);
 
             for(ListenerPosiciones listener : listenerPosiciones){
-                listener.cambioPosicion(
-                        new LatLng(
-                                locationResult.getLastLocation().getLatitude(),
-                                locationResult.getLastLocation().getLongitude()
-                        )
-                );
+                Log.v(TAG, "listener "+listener);
+
+                if(listener != null) {
+                    listener.cambioPosicion(
+                            new LatLng(
+                                    locationResult.getLastLocation().getLatitude(),
+                                    locationResult.getLastLocation().getLongitude()
+                            )
+                    );
+                }
             }
         }
     }
