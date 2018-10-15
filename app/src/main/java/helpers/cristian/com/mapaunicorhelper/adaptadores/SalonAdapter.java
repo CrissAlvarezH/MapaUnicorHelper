@@ -70,4 +70,18 @@ public class SalonAdapter extends RecyclerView.Adapter<SalonAdapter.SalonViewHol
         salones.add(0, salon);
         notifyItemInserted(0);
     }
+
+    public boolean hayUnSalonConEsteCod(String cod){
+        for(Salon salon : salones) {
+            if (salon.getCodigo().equalsIgnoreCase(cod))
+                return true;
+
+        }
+
+        return false;
+    }
+
+    public ArrayList<Salon> getSalones() {
+        return salones;
+    }
 }

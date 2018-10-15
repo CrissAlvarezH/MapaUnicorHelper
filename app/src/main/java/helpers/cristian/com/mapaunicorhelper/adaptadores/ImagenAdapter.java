@@ -78,4 +78,8 @@ public class ImagenAdapter extends RecyclerView.Adapter<ImagenAdapter.ImagenView
         imagenes.add(0, imagen);
         notifyItemInserted(0);
     }
+
+    public ArrayList<Imagen> getImagenes() {
+        return imagenes;
+    }
 }

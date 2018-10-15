@@ -39,12 +39,17 @@ import java.util.Locale;
 
 import helpers.cristian.com.mapaunicorhelper.adaptadores.ImagenAdapter;
 import helpers.cristian.com.mapaunicorhelper.adaptadores.SalonAdapter;
+import helpers.cristian.com.mapaunicorhelper.basedatos.DBManager;
 import helpers.cristian.com.mapaunicorhelper.modelos.Bloque;
 import helpers.cristian.com.mapaunicorhelper.modelos.Imagen;
 import helpers.cristian.com.mapaunicorhelper.modelos.Posicion;
 import helpers.cristian.com.mapaunicorhelper.modelos.Salon;
+import helpers.cristian.com.mapaunicorhelper.modelos.Zona;
 import helpers.cristian.com.mapaunicorhelper.utils.CamaraUtils;
 import helpers.cristian.com.mapaunicorhelper.utils.GaleriaUtils;
+
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_BLOQUE;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_SALON;
 
 public class AddBloqueActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback{
 
@@ -75,6 +80,8 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
     private EditText edtCodSalon, edtPisoSalon, edtNombreSalon;
     private SalonAdapter salonAdapter;
 
+    private DBManager dbManager;
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -103,6 +110,8 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
         salonAdapter = new SalonAdapter(this, new ArrayList<Salon>());
         recyclerSalones.setAdapter(salonAdapter);
         recyclerSalones.setVisibility(View.GONE);
+
+        dbManager = new DBManager(this);
     }
 
     private void enlazarXML(){
@@ -142,11 +151,37 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
 
         switch (item.getItemId()){
             case android.R.id.home:
-                finish();
+                AlertDialog.Builder builderDialog = new AlertDialog.Builder(this)
+                        .setMessage("¿Seguro que quieres salir?")
+                        .setPositiveButton("SI", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                AddBloqueActivity.this.finish();;
+                            }
+                        })
+                        .setNegativeButton("NO", null);
+
+                builderDialog.create().show();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        AlertDialog.Builder builderDialog = new AlertDialog.Builder(this)
+                .setMessage("¿Seguro que quieres salir?")
+                .setPositiveButton("SI", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AddBloqueActivity.this.finish();;
+                    }
+                })
+                .setNegativeButton("NO", null);
+
+        builderDialog.create().show();
     }
 
     @Override
@@ -280,11 +315,63 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
             case R.id.btn_guardar_bloque:
 
                 if( validarCamposBloque() ){
-
+                    guardar();
                 }
 
                 break;
         }
+    }
+
+    private void guardar(){
+        btnGuardar.setEnabled(false);// Para que no de doble click
+
+        // Insertamos la posicion del bloque
+        long idPos = dbManager.insertarModelo(posicionBloque);
+
+        posicionBloque.setId( (int) idPos );
+
+        Bloque bloque = new Bloque(
+                edtNombre.getText().toString().trim(),
+                edtCodigo.getText().toString().trim(),
+                new Zona( spnZona.getSelectedItemPosition(), "" ), // solo importa el id
+                posicionBloque
+        );
+
+        // Insertamos el bloque
+        long bloqueId = dbManager.insertarModelo(bloque);
+        bloque.setId( (int) bloqueId );
+
+        ArrayList<Salon> salones = salonAdapter.getSalones();
+
+        // Insertamos los salones del bloque
+        for( Salon salon : salones ) {
+            salon.setBloque(bloque);
+
+            long idSalon = dbManager.insertarModelo(salon);
+
+            // Insertamos y relacionamos la imagen con el salon
+            long idImg = dbManager.insertarModelo(salon.getImagen());
+
+            dbManager.ejecutarSql(
+                    "INSERT INTO "+TABLA_IMAGEN_SALON+" VALUES (?, ?)",
+                    new String[] {idImg+"", idSalon+""}
+            );
+        }
+
+        ArrayList<Imagen> imagenesBloque = imgAdapter.getImagenes();
+
+        // Insertamos y relacionamos las imagenes con el bloque
+        for( Imagen imagen : imagenesBloque ) {
+            long idImg = dbManager.insertarModelo(imagen);
+
+            dbManager.ejecutarSql(
+                    "INSERT INTO "+TABLA_IMAGEN_BLOQUE+" VALUES (?, ?)",
+                    new String[] {idImg+"", bloque.getId() + ""}
+            );
+        }
+
+        Toast.makeText(this, "Bloque guardado", Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     @Override
@@ -420,12 +507,6 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
             return false;
         }
 
-        if( edtNombre.getText().toString().trim().isEmpty() ){
-            edtNombre.setError("Campo obligatorio");
-            edtNombre.requestFocus();
-            return false;
-        }
-
         if( spnZona.getSelectedItemPosition() == 0 ){
             Toast.makeText(this, "Elija la zona", Toast.LENGTH_SHORT).show();
             return false;
@@ -433,6 +514,11 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
 
         if( imgAdapter.getItemCount() == 0 ){
             Toast.makeText(this, "Debe tomar al menos una imagen para el bloque", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if( salonAdapter.getItemCount() == 0 ){
+            Toast.makeText(this, "Debe agregar los salones", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -457,14 +543,14 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
             return false;
         }
 
-        if( edtNombreSalon.getText().toString().trim().isEmpty() ){
-            edtNombreSalon.setError("Campo obligatorio");
-            edtNombreSalon.requestFocus();
+        if( salonAdapter.hayUnSalonConEsteCod( edtCodSalon.getText().toString().trim() ) ) {
+            Toast.makeText(this, "Ya existe un salon con ese codigo", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         return true;
     }
+
 
     @Override
     protected void onDestroy() {

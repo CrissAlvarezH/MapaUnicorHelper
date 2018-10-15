@@ -25,7 +25,7 @@ public class DBManager {
         return db.update(modelo.getNombreTabla(), modelo.toContentValues(), where, args);
     }
 
-    private void ejecutarSql(String sql, String[] args){
+    public void ejecutarSql(String sql, String[] args){
         db = dbHelper.getWritableDatabase();
 
         if( args != null)

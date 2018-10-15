@@ -33,7 +33,8 @@ public class Imagen implements BaseModelo {
 
         values.put(URL, url);
         values.put(FECHA_TOMADA, fecha);
-        values.put(ID_POSICION, posicion.getId());
+        if( posicion != null)
+            values.put(ID_POSICION, posicion.getId());
 
         return values;
     }

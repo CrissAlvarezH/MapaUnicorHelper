@@ -21,7 +21,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TABLA_SALONES = "salones";
     public static final String TABLA_IMAGEN_BLOQUE = "imagen_bloque";
     public static final String TABLA_IMAGEN_SALON = "imagen_salon";
-    public static final String TABLA_POSICION_BLOQUE = "posicion_bloque";
     public static final String TABLA_IMAGEN_POSICION = "imagen_posicion";
 
     public static final String ID = "id";
@@ -76,7 +75,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 URL + " TEXT NOT NULL, " +
                 FECHA_TOMADA + " TEXT NOT NULL, " +
-                ID_POSICION + " INTEGER NOT NULL, " +
+                ID_POSICION + " INTEGER, " + // Para los salones no tendrá posicion
                 "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
                 ");";
 
@@ -126,12 +125,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
                 ");";
 
-        String CREAR_TABLA_POSICION_BLOQUE = "CREATE TABLE "+TABLA_POSICION_BLOQUE+" ( " +
-                ID_POSICION + " INTEGER NOT NULL, " +
-                ID_BLOQUE + " INTEGER NOT NULL, " +
-                "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+"), " +
-                "FOREIGN KEY("+ID_BLOQUE+") REFERENCES "+TABLA_BLOQUES+"("+ID+") " +
-                ");";
 
         db.execSQL(CREAR_TABLA_RUTAS);
         db.execSQL(CREAR_TABLA_POSICIONES);
@@ -144,7 +137,9 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREAR_TABLA_IMAGEN_BLOQUE);
         db.execSQL(CREAR_TABLA_IMAGEN_SALON);
         db.execSQL(CREAR_TABLA_IMAGEN_POSICION);
-        db.execSQL(CREAR_TABLA_POSICION_BLOQUE);
+
+        String INSERTAR_ZONAS = "INSERT INTO "+TABLA_ZONAS+" VALUES (1, 'Zona 1'),(2, 'Zona 2'),(3, 'Zona 2')";
+        db.execSQL(INSERTAR_ZONAS);
     }
 
     @Override
