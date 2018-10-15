@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -48,8 +49,18 @@ import helpers.cristian.com.mapaunicorhelper.modelos.Zona;
 import helpers.cristian.com.mapaunicorhelper.utils.CamaraUtils;
 import helpers.cristian.com.mapaunicorhelper.utils.GaleriaUtils;
 
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.CODIGO;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_BLOQUE;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_IMAGEN;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_SALON;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_ZONA;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.NOMBRE;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_BLOQUES;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGENES;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_BLOQUE;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_SALON;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_SALONES;
 
 public class AddBloqueActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback, SalonAdapter.ListenerSalones, ImagenAdapter.ListenerImagenes{
 
@@ -81,6 +92,7 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
     private SalonAdapter salonAdapter;
 
     private DBManager dbManager;
+    private int idBloqueParam;// Es el ide que se pasa cuando se le da clik al infowindow del marker
 
     @Override
     protected void onResume() {
@@ -95,6 +107,7 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
         enlazarXML();
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+        idBloqueParam = -1;
 
         camaraUtils = new CamaraUtils(this);
         galeriaUtils = new GaleriaUtils(this);
@@ -112,6 +125,36 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
         recyclerSalones.setVisibility(View.GONE);
 
         dbManager = new DBManager(this);
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle != null ){
+            idBloqueParam = bundle.getInt("id_bloque", -1);
+
+            if( idBloqueParam != -1 ){
+                ArrayList<Bloque> bloques = dbManager.getBoques(ID+" = ?", new String[]{idBloqueParam+""});
+
+                if( !bloques.isEmpty() ){
+                    Bloque bloque = bloques.get(0);// Tomamos el primero
+
+                    // Datos del bloque
+                    edtCodigo.setText( bloque.getCodigo() );
+                    edtNombre.setText( bloque.getNombre() );
+                    spnZona.setSelection( bloque.getZona().getId() );
+
+                    // Imagenes
+                    imgAdapter.setImagenes( bloque.getImagenes() );
+                    recyclerImgs.setVisibility(View.VISIBLE);
+                    txtNoHayImgs.setVisibility(View.GONE);
+
+                    // Salones
+                    salonAdapter.setSalones( bloque.getSalones() );
+                    recyclerSalones.setVisibility(View.VISIBLE);
+                    txtNoHaySalones.setVisibility(View.GONE);
+                }
+            }
+        }
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     private void enlazarXML(){
@@ -283,28 +326,64 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     @Override
                     public void onClick(View v) {
                         if(validarCamposSalon()){
-                            String cod = edtCodSalon.getText().toString().trim();
-                            String nombre = edtNombreSalon.getText().toString().trim();
-                            int piso = Integer.parseInt( edtPisoSalon.getText().toString().trim() );
+                            if( idBloqueParam == -1 ) {
+                                String cod = edtCodSalon.getText().toString().trim();
+                                String nombre = edtNombreSalon.getText().toString().trim();
+                                int piso = Integer.parseInt(edtPisoSalon.getText().toString().trim());
 
-                            Salon salon = new Salon(
-                                    nombre,
-                                    cod,
-                                    null,// el bloque aún no se ha insertado
-                                    piso,
-                                    imagenSalon
-                            );
+                                Salon salon = new Salon(
+                                        nombre,
+                                        cod,
+                                        null,// el bloque aún no se ha insertado
+                                        piso,
+                                        imagenSalon
+                                );
 
-                            recyclerSalones.setVisibility(View.VISIBLE);
-                            txtNoHaySalones.setVisibility(View.GONE);
+                                recyclerSalones.setVisibility(View.VISIBLE);
+                                txtNoHaySalones.setVisibility(View.GONE);
 
-                            salonAdapter.agregarSalon(salon);
-                            recyclerSalones.smoothScrollToPosition(0);
+                                salonAdapter.agregarSalon(salon);
+                                recyclerSalones.smoothScrollToPosition(0);
 
-                            imagenSalon = null;// para el proximo salon
+                                imagenSalon = null;// para el proximo salon
 
-                            if( !AddBloqueActivity.this.isFinishing() )
-                                dialogAddSalon.dismiss();
+                                if (!AddBloqueActivity.this.isFinishing())
+                                    dialogAddSalon.dismiss();
+                            }else{
+                                String cod = edtCodSalon.getText().toString().trim();
+                                String nombre = edtNombreSalon.getText().toString().trim();
+                                int piso = Integer.parseInt(edtPisoSalon.getText().toString().trim());
+
+                                Salon salon = new Salon(
+                                        nombre,
+                                        cod,
+                                        new Bloque(idBloqueParam, null, null, null, null),
+                                        piso,
+                                        imagenSalon
+                                );
+
+                                // Si ya viene el id del bloque procedemos a insertar aqui mismo
+                                long idSalon = dbManager.insertarModelo(salon);
+
+                                // Insertamos y relacionamos la imagen con el salon
+                                long idImg = dbManager.insertarModelo(salon.getImagen());
+
+                                dbManager.ejecutarSql(
+                                        "INSERT INTO "+TABLA_IMAGEN_SALON+" VALUES (?, ?)",
+                                        new String[] {idImg+"", idSalon+""}
+                                );
+
+                                recyclerSalones.setVisibility(View.VISIBLE);
+                                txtNoHaySalones.setVisibility(View.GONE);
+
+                                salonAdapter.agregarSalon(salon);
+                                recyclerSalones.smoothScrollToPosition(0);
+
+                                imagenSalon = null;// para el proximo salon
+
+                                if (!AddBloqueActivity.this.isFinishing())
+                                    dialogAddSalon.dismiss();
+                            }
                         }
                     }
                 });
@@ -315,7 +394,24 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
             case R.id.btn_guardar_bloque:
 
                 if( validarCamposBloque() ){
-                    guardar();
+                    if( idBloqueParam == -1 ){
+                        guardar();
+                    }else {
+                        // Actualizamos los datos de la tabla BLOQUES
+                        String nombre = edtNombre.getText().toString().trim();
+                        String codigo = edtCodigo.getText().toString().trim();
+                        int idZona = spnZona.getSelectedItemPosition();
+
+                        dbManager.ejecutarSql(
+                                "UPDATE "+TABLA_BLOQUES+
+                                        " SET "+NOMBRE+" = ?, "+
+                                               CODIGO+" = ?,"+
+                                                ID_ZONA+" = ? ",
+                                new String[] { nombre, codigo, idZona +"" }
+                        );
+
+                        finish();
+                    }
                 }
 
                 break;
@@ -437,11 +533,23 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
 
                     rutaImg = camaraUtils.getRuta();
 
-                    imgAdapter.agregarImagen(new Imagen(
+                    Imagen imagenG = new Imagen(
                             rutaImg,
                             ahora,
                             posicionBloque
-                    ));
+                    );
+
+                    imgAdapter.agregarImagen(imagenG);
+
+                    if( idBloqueParam != -1 ){
+                        // Insertamos la imagen aquí mismo y la relacionamos con el bloque
+                        long idImg = dbManager.insertarModelo(imagenG);
+
+                        dbManager.ejecutarSql(
+                                "INSERT INTO "+TABLA_IMAGEN_BLOQUE+" VALUES (?, ?)",
+                                new String[] {idImg+"", idBloqueParam + ""}
+                        );
+                    }
 
                     recyclerImgs.smoothScrollToPosition(0);
 
@@ -454,11 +562,23 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
 
                     rutaImg = galeriaUtils.getRuta();
 
-                    imgAdapter.agregarImagen(new Imagen(
+                    Imagen imagenC = new Imagen(
                             rutaImg,
                             ahora,
                             posicionBloque
-                    ));
+                    );
+
+                    imgAdapter.agregarImagen(imagenC);
+
+                    if( idBloqueParam != -1 ){
+                        // Insertamos la imagen aquí mismo y la relacionamos con el bloque
+                        long idImg = dbManager.insertarModelo(imagenC);
+
+                        dbManager.ejecutarSql(
+                                "INSERT INTO "+TABLA_IMAGEN_BLOQUE+" VALUES (?, ?)",
+                                new String[] {idImg+"", idBloqueParam + ""}
+                        );
+                    }
 
                     recyclerImgs.smoothScrollToPosition(0);
 
@@ -552,13 +672,31 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    public void longClickImg(Imagen imagen,final int posicion) {
+    public void longClickImg(final Imagen imagen, final int posicion) {
         AlertDialog.Builder builderDialog = new AlertDialog.Builder(this)
                 .setMessage("¿Seguro que quieres eliminar esta imagen?")
                 .setPositiveButton("SI", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        if( idBloqueParam != -1 ) {
+                            // Eliminamos la imagen aqui mismo
+                            dbManager.ejecutarSql(
+                                    "DELETE FROM "+TABLA_IMAGEN_BLOQUE+
+                                            " WHERE "+ID_IMAGEN+" = ? "+
+                                            " AND "+ID_BLOQUE + " = ? ",
+                                    new String[]{ imagen.getId()+"", idBloqueParam+"" }
+                            );
+
+                            dbManager.ejecutarSql(
+                                    "DELETE FROM "+TABLA_IMAGENES+
+                                            " WHERE "+ID+" = ?",
+                                    new String[] { imagen.getId()+"" }
+                            );
+                        }
+
                         imgAdapter.eliminarImagen(posicion);
+
                     }
                 })
                 .setNegativeButton("NO", null);
@@ -567,13 +705,35 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    public void longClickSalon(Salon salon, final int posicion) {
+    public void longClickSalon(final Salon salon, final int posicion) {
         AlertDialog.Builder builderDialog = new AlertDialog.Builder(this)
                 .setMessage("¿Seguro que quieres eliminar el salon "+salon.getCodigo()+"?")
                 .setPositiveButton("SI", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        if( idBloqueParam != -1  ) {
+                            dbManager.ejecutarSql(
+                                    "DELETE FROM "+TABLA_IMAGEN_SALON+
+                                            " WHERE "+ID_SALON+" = ? ",
+                                    new String[] { salon.getId()+"" }
+                            );
+
+                            dbManager.ejecutarSql(
+                                    "DELETE FROM "+TABLA_IMAGENES+
+                                            " WHERE "+ID+" = ?",
+                                    new String[] {salon.getImagen().getId()+""}
+                            );
+
+                            dbManager.ejecutarSql(
+                                    "DELETE FROM "+TABLA_SALONES+
+                                            " WHERE "+ID+" = ? ",
+                                    new String[] { salon.getId()+"" }
+                            );
+                        }
+
                         salonAdapter.eliminarSalon(posicion);
+
                     }
                 })
                 .setNegativeButton("NO", null);

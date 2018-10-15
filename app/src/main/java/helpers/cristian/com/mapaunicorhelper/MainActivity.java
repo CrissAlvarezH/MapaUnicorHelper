@@ -47,6 +47,7 @@ public class MainActivity extends FragmentActivity {
     private LinearLayout layoutPosNoDisp;
 
     private ArrayList<ListenerPosiciones> listenerPosiciones = new ArrayList<>();
+    private PosicionesCallback posicionesCallbak;
 
     public interface ListenerPosiciones {
         void cambioPosicion(LatLng posicion);
@@ -85,7 +86,8 @@ public class MainActivity extends FragmentActivity {
             Toast.makeText(this, "Debes conseder los permisos", Toast.LENGTH_SHORT).show();
             validarPermisos();
         }else{
-            clientePosiciones.requestLocationUpdates(locationRequest, new PosicionesCallback(), null);
+            posicionesCallbak = new PosicionesCallback();
+            clientePosiciones.requestLocationUpdates(locationRequest, posicionesCallbak, null);
         }
     }
 
@@ -196,5 +198,13 @@ public class MainActivity extends FragmentActivity {
         }
 
         return todosConsedidos;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if( clientePosiciones != null && posicionesCallbak != null)
+            clientePosiciones.removeLocationUpdates(posicionesCallbak);
     }
 }

@@ -104,4 +104,9 @@ public class ImagenAdapter extends RecyclerView.Adapter<ImagenAdapter.ImagenView
         this.imagenes.remove(posicion);
         notifyItemRemoved(posicion);
     }
+
+    public void setImagenes(ArrayList<Imagen> imagenes) {
+        this.imagenes = imagenes;
+        notifyDataSetChanged();
+    }
 }

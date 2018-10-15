@@ -2,6 +2,8 @@ package helpers.cristian.com.mapaunicorhelper.modelos;
 
 import android.content.ContentValues;
 
+import java.util.ArrayList;
+
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.CODIGO;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_POSICION;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_ZONA;
@@ -15,6 +17,8 @@ public class Bloque implements BaseModelo {
     private String codigo;
     private Zona zona;
     private Posicion posicion;
+    private ArrayList<Imagen> imagenes;
+    private ArrayList<Salon> salones;
 
     public Bloque(String nombre, String codigo, Zona zona, Posicion posicion) {
         this.nombre = nombre;
@@ -29,6 +33,10 @@ public class Bloque implements BaseModelo {
         this.codigo = codigo;
         this.zona = zona;
         this.posicion = posicion;
+    }
+
+    public Bloque(){
+
     }
 
     @Override
@@ -46,6 +54,22 @@ public class Bloque implements BaseModelo {
     @Override
     public String getNombreTabla() {
         return TABLA_BLOQUES;
+    }
+
+    public ArrayList<Imagen> getImagenes() {
+        return imagenes;
+    }
+
+    public void setImagenes(ArrayList<Imagen> imagenes) {
+        this.imagenes = imagenes;
+    }
+
+    public ArrayList<Salon> getSalones() {
+        return salones;
+    }
+
+    public void setSalones(ArrayList<Salon> salones) {
+        this.salones = salones;
     }
 
     public int getId() {

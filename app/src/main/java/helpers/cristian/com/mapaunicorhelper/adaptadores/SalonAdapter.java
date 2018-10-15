@@ -102,6 +102,11 @@ public class SalonAdapter extends RecyclerView.Adapter<SalonAdapter.SalonViewHol
         return salones;
     }
 
+    public void setSalones(ArrayList<Salon> salones) {
+        this.salones = salones;
+        notifyDataSetChanged();
+    }
+
     public void eliminarSalon(int posicion) {
         this.salones.remove(posicion);
         notifyItemRemoved(posicion);

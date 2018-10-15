@@ -8,11 +8,15 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -22,17 +26,28 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
+
 import helpers.cristian.com.mapaunicorhelper.AddBloqueActivity;
 import helpers.cristian.com.mapaunicorhelper.MainActivity;
 import helpers.cristian.com.mapaunicorhelper.R;
+import helpers.cristian.com.mapaunicorhelper.adaptadores.SalonAdapter;
+import helpers.cristian.com.mapaunicorhelper.basedatos.DBManager;
+import helpers.cristian.com.mapaunicorhelper.modelos.Bloque;
+import helpers.cristian.com.mapaunicorhelper.modelos.Salon;
 
 
-public class BloquesFragment extends Fragment implements OnMapReadyCallback, MainActivity.ListenerPosiciones, View.OnClickListener {
+public class BloquesFragment extends Fragment implements OnMapReadyCallback,
+        MainActivity.ListenerPosiciones,
+        View.OnClickListener,
+        GoogleMap.OnInfoWindowClickListener{
 
     private final String TAG = "FragmentoBloques";
 
@@ -46,6 +61,10 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
 
     private LatLng posActual;
 
+    private DBManager dbManager;
+    private ArrayList<Bloque> bloques = new ArrayList<>();
+
+
     public BloquesFragment() {
     }
 
@@ -53,6 +72,10 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
     public void onResume() {
         super.onResume();
         mapView.onResume();
+
+        refreshBloques();
+
+
     }
 
 
@@ -63,6 +86,7 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
         View vista = inflater.inflate(R.layout.fragment_bloques, container, false);
         miMarker = null;
         posActual = null;
+        dbManager = new DBManager(getContext());
 
         progress = vista.findViewById(R.id.progress_bloques);
         fabAddBloque = vista.findViewById(R.id.fab_add_bloque);
@@ -83,12 +107,14 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
-                            if(location != null)
-                                establecerPosicion(new LatLng(location.getLatitude(), location.getLongitude()));
+                            if(location != null){
+                                LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
+
+                                establecerPosicion(pos);
+                            }
                         }
                     });
         }
-
 
         return vista;
     }
@@ -98,6 +124,67 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
     public void onMapReady(GoogleMap googleMap) {
         mapa = googleMap;
         mapa.getUiSettings().setMapToolbarEnabled(false);
+        mapa.setOnInfoWindowClickListener(this);
+
+        refreshBloques();
+
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            new FusedLocationProviderClient(getContext()).getLastLocation()
+                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if(location != null){
+                                LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
+
+                                if (miMarker != null) {
+                                    miMarker.setPosition(pos);
+                                    return;
+                                }
+
+                                miMarker = mapa.addMarker(new MarkerOptions().title("Mi posición").position(pos));
+                            }
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Integer idBloque = (Integer) marker.getTag();
+
+        if( idBloque != null ) {
+            startActivity(
+                    new Intent(getContext(), AddBloqueActivity.class)
+                            .putExtra("id_bloque", idBloque)
+                            .putExtra("pos", marker.getPosition())
+            );
+        }
+    }
+
+
+    private void refreshBloques(){
+        bloques = dbManager.getBoques(null, null);
+        if( mapa != null ){
+            mapa.clear();
+            miMarker = null;// porque limpiamos el mapa
+
+            // Colocamos los marcadores de las posiciones de los bloques
+            for(Bloque bloque : bloques){
+                MarkerOptions mkopt = new MarkerOptions()
+                        .title( bloque.getCodigo() + " - " + bloque.getNombre() )
+                        .position( new LatLng(
+                                bloque.getPosicion().getLatitud(),
+                                bloque.getPosicion().getLongitud()
+                        ))
+                        .icon( BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE) );
+
+                Marker marker = mapa.addMarker( mkopt );
+                marker.setTag( bloque.getId() );// Para identificar el marcador con el bloque
+            }
+        }
     }
 
     @Override
@@ -144,4 +231,7 @@ public class BloquesFragment extends Fragment implements OnMapReadyCallback, Mai
 
         ( (MainActivity) getContext()).removerListenerPosicion(this);
     }
+
+
+
 }
