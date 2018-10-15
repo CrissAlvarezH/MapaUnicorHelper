@@ -51,7 +51,7 @@ import helpers.cristian.com.mapaunicorhelper.utils.GaleriaUtils;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_BLOQUE;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_SALON;
 
-public class AddBloqueActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback{
+public class AddBloqueActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback, SalonAdapter.ListenerSalones, ImagenAdapter.ListenerImagenes{
 
     private static final int INTENT_CAMARA_BLOQUE = 432;
     private static final int INTENT_GALERIA_BLOQUE = 623;
@@ -103,11 +103,11 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
 
         posicionBloque = new Posicion(posBloque.latitude, posBloque.longitude);
 
-        imgAdapter = new ImagenAdapter(this, new ArrayList<Imagen>());
+        imgAdapter = new ImagenAdapter(this, new ArrayList<Imagen>(), this);
         recyclerImgs.setAdapter(imgAdapter);
         recyclerImgs.setVisibility(View.GONE);
 
-        salonAdapter = new SalonAdapter(this, new ArrayList<Salon>());
+        salonAdapter = new SalonAdapter(this, new ArrayList<Salon>(), this);
         recyclerSalones.setAdapter(salonAdapter);
         recyclerSalones.setVisibility(View.GONE);
 
@@ -551,10 +551,41 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
         return true;
     }
 
+    @Override
+    public void longClickImg(Imagen imagen,final int posicion) {
+        AlertDialog.Builder builderDialog = new AlertDialog.Builder(this)
+                .setMessage("¿Seguro que quieres eliminar esta imagen?")
+                .setPositiveButton("SI", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        imgAdapter.eliminarImagen(posicion);
+                    }
+                })
+                .setNegativeButton("NO", null);
+
+        builderDialog.create().show();
+    }
+
+    @Override
+    public void longClickSalon(Salon salon, final int posicion) {
+        AlertDialog.Builder builderDialog = new AlertDialog.Builder(this)
+                .setMessage("¿Seguro que quieres eliminar el salon "+salon.getCodigo()+"?")
+                .setPositiveButton("SI", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        salonAdapter.eliminarSalon(posicion);
+                    }
+                })
+                .setNegativeButton("NO", null);
+
+        builderDialog.create().show();
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
     }
+
+
 }

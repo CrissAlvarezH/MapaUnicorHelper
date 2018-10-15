@@ -17,15 +17,21 @@ import helpers.cristian.com.mapaunicorhelper.R;
 import helpers.cristian.com.mapaunicorhelper.modelos.Salon;
 
 public class SalonAdapter extends RecyclerView.Adapter<SalonAdapter.SalonViewHolder>{
-    private Context contexto;
-    private ArrayList<Salon> salones;
-
-    public SalonAdapter(Context contexto, ArrayList<Salon> salones) {
-        this.contexto = contexto;
-        this.salones = salones;
+    public interface ListenerSalones {
+        void longClickSalon(Salon salon, int posicion);
     }
 
-    public class SalonViewHolder extends RecyclerView.ViewHolder {
+    private Context contexto;
+    private ArrayList<Salon> salones;
+    private ListenerSalones listener;
+
+    public SalonAdapter(Context contexto, ArrayList<Salon> salones, ListenerSalones listener) {
+        this.contexto = contexto;
+        this.salones = salones;
+        this.listener = listener;
+    }
+
+    public class SalonViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
         private TextView txtTexto, txtPiso;
         private ImageView img;
 
@@ -35,12 +41,23 @@ public class SalonAdapter extends RecyclerView.Adapter<SalonAdapter.SalonViewHol
             txtPiso = itemView.findViewById(R.id.item_txt_piso);
             txtTexto = itemView.findViewById(R.id.item_img_texto);
             img = itemView.findViewById(R.id.item_img);
+
+            itemView.setOnLongClickListener(this);
         }
 
         public void setImg(String ruta){
             Glide.with(contexto)
                     .load(ruta)
                     .into(img);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if(listener != null){
+                listener.longClickSalon( salones.get(getAdapterPosition()), getAdapterPosition() );
+                return true;
+            }
+            return false;
         }
     }
 
@@ -83,5 +100,10 @@ public class SalonAdapter extends RecyclerView.Adapter<SalonAdapter.SalonViewHol
 
     public ArrayList<Salon> getSalones() {
         return salones;
+    }
+
+    public void eliminarSalon(int posicion) {
+        this.salones.remove(posicion);
+        notifyItemRemoved(posicion);
     }
 }

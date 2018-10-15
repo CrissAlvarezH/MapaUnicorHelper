@@ -17,15 +17,21 @@ import helpers.cristian.com.mapaunicorhelper.R;
 import helpers.cristian.com.mapaunicorhelper.modelos.Imagen;
 
 public class ImagenAdapter extends RecyclerView.Adapter<ImagenAdapter.ImagenViewHolder>{
-    private Context contexto;
-    private ArrayList<Imagen> imagenes;
-
-    public ImagenAdapter(Context contexto, ArrayList<Imagen> imagenes) {
-        this.contexto = contexto;
-        this.imagenes = imagenes;
+    public interface ListenerImagenes {
+        void longClickImg(Imagen imagen, int posicion);
     }
 
-    public class ImagenViewHolder extends RecyclerView.ViewHolder {
+    private Context contexto;
+    private ArrayList<Imagen> imagenes;
+    private ListenerImagenes listener;
+
+    public ImagenAdapter(Context contexto, ArrayList<Imagen> imagenes, ListenerImagenes listener) {
+        this.contexto = contexto;
+        this.imagenes = imagenes;
+        this.listener = listener;
+    }
+
+    public class ImagenViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
         private TextView txtTexto;
         private ImageView img;
 
@@ -34,6 +40,8 @@ public class ImagenAdapter extends RecyclerView.Adapter<ImagenAdapter.ImagenView
 
             txtTexto = itemView.findViewById(R.id.item_img_texto);
             img = itemView.findViewById(R.id.item_img);
+
+            itemView.setOnLongClickListener(this);
         }
 
         public void setTexto(String texto){
@@ -49,6 +57,15 @@ public class ImagenAdapter extends RecyclerView.Adapter<ImagenAdapter.ImagenView
             Glide.with(contexto)
                     .load(ruta)
                     .into(img);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if(listener != null){
+                listener.longClickImg( imagenes.get(getAdapterPosition()), getAdapterPosition() );
+                return true;
+            }
+            return false;
         }
     }
 
@@ -81,5 +98,10 @@ public class ImagenAdapter extends RecyclerView.Adapter<ImagenAdapter.ImagenView
 
     public ArrayList<Imagen> getImagenes() {
         return imagenes;
+    }
+
+    public void eliminarImagen(int posicion){
+        this.imagenes.remove(posicion);
+        notifyItemRemoved(posicion);
     }
 }
