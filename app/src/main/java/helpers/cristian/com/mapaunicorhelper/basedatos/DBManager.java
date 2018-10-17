@@ -10,6 +10,7 @@ import helpers.cristian.com.mapaunicorhelper.modelos.BaseModelo;
 import helpers.cristian.com.mapaunicorhelper.modelos.Bloque;
 import helpers.cristian.com.mapaunicorhelper.modelos.Imagen;
 import helpers.cristian.com.mapaunicorhelper.modelos.Posicion;
+import helpers.cristian.com.mapaunicorhelper.modelos.Ruta;
 import helpers.cristian.com.mapaunicorhelper.modelos.Salon;
 import helpers.cristian.com.mapaunicorhelper.modelos.Zona;
 
@@ -19,17 +20,22 @@ import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_BLOQUE;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_IMAGEN;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_POSICION;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_RUTA;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_SALON;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_ZONA;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.LATITUD;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.LONGITUD;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.NOMBRE;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.NUMERO;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.PISO;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_BLOQUES;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGENES;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_BLOQUE;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_POSICION;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGEN_SALON;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_POSICIONES;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_RUTAS;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_RUTA_POSICION;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_SALONES;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.URL;
 
@@ -182,5 +188,86 @@ public class DBManager {
         cur.close();
 
         return bloques;
+    }
+
+    public ArrayList<Ruta> getRutas(String where, String[] args) {
+        db = dbHelper.getReadableDatabase();
+
+        Cursor cRutas = db.query(TABLA_RUTAS, null, where, args, null, null, null);
+
+        ArrayList<Ruta> rutas = new ArrayList<>();
+
+        if( cRutas.moveToFirst() ) {
+            do {
+                Ruta ruta = new Ruta(
+                        cRutas.getInt( cRutas.getColumnIndex(ID) ),
+                        cRutas.getString( cRutas.getColumnIndex(NOMBRE) )
+                );
+
+                Cursor cPos = db.rawQuery(
+                        "SELECT "+TABLA_POSICIONES+".*, " +TABLA_RUTA_POSICION+"."+NUMERO+
+                                " FROM "+TABLA_POSICIONES+", "+TABLA_RUTA_POSICION+
+                                " WHERE "+TABLA_POSICIONES+"."+ID+" = "+TABLA_RUTA_POSICION+"."+ID_POSICION+
+                                " AND "+TABLA_RUTA_POSICION+"."+ID_RUTA+" = ? " +
+                                " ORDER BY "+NUMERO+" ASC ",
+                        new String[] { ruta.getId() + "" }
+                );
+
+                ArrayList<Posicion> posiciones = new ArrayList<>();
+
+                if( cPos.moveToFirst() ) {
+                    do {
+                        Posicion pos = new Posicion(
+                                cPos.getInt(cPos.getColumnIndex(ID)),
+                                cPos.getDouble(cPos.getColumnIndex(LATITUD)),
+                                cPos.getDouble(cPos.getColumnIndex(LONGITUD))
+                        );
+
+                        // El numero de la posicion en la ruta
+                        pos.setNumero( cPos.getInt( cPos.getColumnIndex(NUMERO) ) );
+
+                        Cursor cImgs = db.rawQuery(
+                                "SELECT "+TABLA_IMAGENES+".* " +
+                                        " FROM "+TABLA_IMAGENES+", "+TABLA_IMAGEN_POSICION+
+                                        " WHERE "+TABLA_IMAGENES+"."+ID+" = "+TABLA_IMAGEN_POSICION+"."+ID_IMAGEN +
+                                        " AND "+TABLA_IMAGEN_POSICION+"."+ID_POSICION+" = ?",
+                                new String[] { pos.getId()+"" }
+                        );
+
+                        ArrayList<Imagen> imagenes = new ArrayList<>();
+
+                        if( cImgs.moveToFirst() ) {
+                            do {
+                                Imagen imagen = new Imagen(
+                                        cImgs.getInt( cImgs.getColumnIndex(ID) ),
+                                        cImgs.getString( cImgs.getColumnIndex(URL) ),
+                                        cImgs.getString( cImgs.getColumnIndex(FECHA_TOMADA) ),
+                                        pos
+                                );
+
+                                imagenes.add(imagen);
+                            } while( cImgs.moveToNext() );
+                        }
+
+                        cImgs.close();
+
+                        pos.setImagenes(imagenes);
+
+                        posiciones.add(pos);
+                    } while ( cPos.moveToNext() );
+                }
+
+                cPos.close();
+
+                ruta.setPosiciones( posiciones );
+
+                rutas.add(ruta);
+
+            } while( cRutas.moveToNext() );
+        }
+
+        cRutas.close();
+
+        return rutas;
     }
 }

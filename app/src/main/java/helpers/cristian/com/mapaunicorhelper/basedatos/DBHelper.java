@@ -38,8 +38,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String FECHA_TOMADA = "fecha_tomada";
     public static final String NOMBRE = "nombre";
     public static final String CODIGO = "codigo";
-    public static final String ORIENTACION = "orientacion";
     public static final String PISO = "piso";
+    public static final String NUMERO = "numero";
 
 
     @Override
@@ -56,12 +56,14 @@ public class DBHelper extends SQLiteOpenHelper {
                 ");";
 
         String CREAR_TABLA_RUTA_POSICION = "CREATE TABLE "+TABLA_RUTA_POSICION+" ( " +
+                NUMERO + " INTEGER NOT NULL, " +// Para llevar un orden y saber cual es el inicio y cual posicion sigue
                 ID_POSICION + " INTEGER NOT NULL, " +
                 ID_RUTA + " INTEGER NOT NULL, " +
                 "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+"), " +
                 "FOREIGN KEY("+ID_RUTA+") REFERENCES "+TABLA_RUTAS+"("+ID+") " +
                 ");";
 
+        // Cuando hay un cruce de caminos
         String CREAR_TABLA_INTERCEPCION_RUTAS = "CREATE TABLE "+TABLA_INTERCEPCION_RUTAS+" ( " +
                 ID_RUTA_1 + " INTEGER NOT NULL, " +
                 ID_RUTA_2 + " INTEGER NOT NULL, " +
@@ -120,7 +122,6 @@ public class DBHelper extends SQLiteOpenHelper {
         String CREAR_TABLA_IMAGEN_POSICION = "CREATE TABLE "+TABLA_IMAGEN_POSICION+" ( " +
                 ID_IMAGEN + " INTEGER NOT NULL, " +
                 ID_POSICION + " INTEGER NOT NULL, " +
-                ORIENTACION + " TEXT NOT NULL, " +
                 "FOREIGN KEY("+ID_IMAGEN+") REFERENCES "+TABLA_IMAGENES+"("+ID+"), " +
                 "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
                 ");";
