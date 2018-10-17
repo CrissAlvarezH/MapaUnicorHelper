@@ -12,6 +12,7 @@ public class Imagen implements BaseModelo {
     private int id;
     private String url;
     private String fecha;
+    private String estado;
     private Posicion posicion;
 
     public Imagen(String url, String fecha, Posicion posicion) {
@@ -42,6 +43,12 @@ public class Imagen implements BaseModelo {
     @Override
     public String getNombreTabla() {
         return TABLA_IMAGENES;
+    }
+
+    public interface Estados {
+        String NO_ENVIADA = "no_enviada";
+        String ENVIADA = "enviada";
+        String RUTA_NULA = "ruta_null";
     }
 
     public String getUrl() {

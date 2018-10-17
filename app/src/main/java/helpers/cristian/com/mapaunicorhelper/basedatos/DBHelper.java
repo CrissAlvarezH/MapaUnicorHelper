@@ -40,6 +40,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String CODIGO = "codigo";
     public static final String PISO = "piso";
     public static final String NUMERO = "numero";
+    public static final String ESTADO = "estado";
 
 
     @Override
@@ -77,6 +78,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 URL + " TEXT NOT NULL, " +
                 FECHA_TOMADA + " TEXT NOT NULL, " +
+                ESTADO + " TEXT NOT NULL, " +// Campo solo para la app, para saber si fue enviada al servidor
                 ID_POSICION + " INTEGER, " + // Para los salones no tendrá posicion
                 "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
                 ");";
