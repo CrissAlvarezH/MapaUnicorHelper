@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -128,6 +129,15 @@ public class MainActivity extends FragmentActivity {
         @Override
         public int getCount() {
             return fragmentos.size();
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment fragment = (Fragment) super.instantiateItem(container, position);
+
+            fragmentos.set(position, fragment);
+
+            return fragment;
         }
 
         @Nullable
