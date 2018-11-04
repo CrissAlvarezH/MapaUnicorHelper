@@ -2,6 +2,7 @@ package helpers.cristian.com.mapaunicorhelper.modelos;
 
 import android.content.ContentValues;
 
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ESTADO;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.FECHA_TOMADA;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_POSICION;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_IMAGENES;
@@ -15,17 +16,19 @@ public class Imagen implements BaseModelo {
     private String estado;
     private Posicion posicion;
 
-    public Imagen(String url, String fecha, Posicion posicion) {
+    public Imagen(String url, String fecha, Posicion posicion, String estado) {
         this.url = url;
         this.fecha = fecha;
         this.posicion = posicion;
+        this.estado = estado;
     }
 
-    public Imagen(int id, String url, String fecha, Posicion posicion) {
+    public Imagen(int id, String url, String fecha, Posicion posicion, String estado) {
         this.id = id;
         this.url = url;
         this.fecha = fecha;
         this.posicion = posicion;
+        this.estado = estado;
     }
 
     @Override
@@ -34,6 +37,7 @@ public class Imagen implements BaseModelo {
 
         values.put(URL, url);
         values.put(FECHA_TOMADA, fecha);
+        values.put(ESTADO, estado);
         if( posicion != null)
             values.put(ID_POSICION, posicion.getId());
 

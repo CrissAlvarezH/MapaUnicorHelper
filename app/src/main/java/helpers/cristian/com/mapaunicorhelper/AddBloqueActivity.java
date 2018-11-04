@@ -536,7 +536,8 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     Imagen imagenG = new Imagen(
                             rutaImg,
                             ahora,
-                            posicionBloque
+                            posicionBloque,
+                            Imagen.Estados.NO_ENVIADA
                     );
 
                     imgAdapter.agregarImagen(imagenG);
@@ -565,7 +566,8 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     Imagen imagenC = new Imagen(
                             rutaImg,
                             ahora,
-                            posicionBloque
+                            posicionBloque,
+                            Imagen.Estados.NO_ENVIADA
                     );
 
                     imgAdapter.agregarImagen(imagenC);
@@ -593,7 +595,8 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     imagenSalon = new Imagen(
                             rutaImg,
                             ahora,
-                            null// Esta imagen solo está asociada al salón
+                            null,// Esta imagen solo está asociada al salón
+                            Imagen.Estados.NO_ENVIADA
                     );
 
                     break;
@@ -610,7 +613,8 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     imagenSalon = new Imagen(
                             rutaImg,
                             ahora,
-                            null// Esta imagen solo está asociada al salón
+                            null,// Esta imagen solo está asociada al salón,
+                            Imagen.Estados.NO_ENVIADA
                     );
 
                     break;

@@ -1,5 +1,6 @@
 package helpers.cristian.com.mapaunicorhelper.basedatos;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,6 +16,7 @@ import helpers.cristian.com.mapaunicorhelper.modelos.Salon;
 import helpers.cristian.com.mapaunicorhelper.modelos.Zona;
 
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.CODIGO;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ESTADO;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.FECHA_TOMADA;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_BLOQUE;
@@ -68,6 +70,63 @@ public class DBManager {
             db.execSQL(sql);
     }
 
+    public void agregarRuta() {
+        db = dbHelper.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM "+TABLA_RUTAS+" ORDER BY "+ID+" DESC LIMIT 1 ",
+                null
+        );
+
+        if( cursor.moveToFirst() ) {
+            int idULtimo = cursor.getInt( cursor.getColumnIndex(ID) );
+
+            ContentValues values = new ContentValues();
+            values.put(NOMBRE, "Ruta "+ (idULtimo+1));// Si el id del ultimo es 2, el nombre del siguiente será Ruta 3
+
+            db.insert(TABLA_RUTAS, null, values);
+
+        }else{
+            // Primara ruta
+            ContentValues values = new ContentValues();
+            values.put(NOMBRE, "Ruta 1");
+
+            db.insert(TABLA_RUTAS, null, values);
+        }
+
+        cursor.close();
+    }
+
+    public void agregarPosToRuta(Posicion posicion, int idRuta) {
+        db = dbHelper.getWritableDatabase();
+
+        // Obtenemos el numero de la ultima posicion de la ruta
+        Cursor cursor = db.rawQuery(
+                "SELECT "+NUMERO+" FROM "+TABLA_RUTA_POSICION+
+                        " WHERE "+ID_RUTA+" = ? ORDER BY "+NUMERO+" DESC LIMIT 1",
+                new String[]{ idRuta+"" }
+        );
+
+        int numero = 0;
+
+        if( cursor.moveToFirst() ) {
+            numero = cursor.getInt( cursor.getColumnIndex(NUMERO) );
+        }
+
+        // Insertamos la posicion
+        int idPos = (int) db.insert(posicion.getNombreTabla(), null, posicion.toContentValues());
+
+        // Relacionamos la posición con la ruta
+        ContentValues val = new ContentValues();
+        val.put(NUMERO, numero + 1);// Indicando que es la posicion siguiente
+        val.put(ID_POSICION, idPos);
+        val.put(ID_RUTA, idRuta);
+
+        db.insert(TABLA_RUTA_POSICION, null, val);
+
+        cursor.close();
+    }
+
     public ArrayList<Bloque> getBoques(String where, String[] args) {
         db = dbHelper.getReadableDatabase();
 
@@ -118,7 +177,8 @@ public class DBManager {
                                 cImg.getInt( cImg.getColumnIndex(ID) ),
                                 cImg.getString( cImg.getColumnIndex(URL) ),
                                 cImg.getString( cImg.getColumnIndex(FECHA_TOMADA) ),
-                                null
+                                null,
+                                cImg.getString( cImg.getColumnIndex(ESTADO) )
                         );
 
                         imagenes.add(imagen);
@@ -164,7 +224,8 @@ public class DBManager {
                                     cimgs.getInt( cimgs.getColumnIndex(ID) ),
                                     cimgs.getString( cimgs.getColumnIndex(URL) ),
                                     cimgs.getString( cimgs.getColumnIndex(FECHA_TOMADA) ),
-                                    null
+                                    null,
+                                    cimgs.getString( cimgs.getColumnIndex(ESTADO) )
                             ));
                         }
 
@@ -242,7 +303,8 @@ public class DBManager {
                                         cImgs.getInt( cImgs.getColumnIndex(ID) ),
                                         cImgs.getString( cImgs.getColumnIndex(URL) ),
                                         cImgs.getString( cImgs.getColumnIndex(FECHA_TOMADA) ),
-                                        pos
+                                        pos,
+                                        cImgs.getString( cImgs.getColumnIndex(ESTADO) )
                                 );
 
                                 imagenes.add(imagen);
