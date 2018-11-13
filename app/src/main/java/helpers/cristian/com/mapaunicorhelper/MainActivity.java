@@ -194,10 +194,18 @@ public class MainActivity extends FragmentActivity {
         boolean permisoFineLocation = ( ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED);
 
+        boolean permisoCoarseLocation = ( ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED);
+
 
         if(!permisoFineLocation){
             todosConsedidos = false;
             permisosFaltantes.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+
+        if(!permisoCoarseLocation){
+            todosConsedidos = false;
+            permisosFaltantes.add(Manifest.permission.ACCESS_COARSE_LOCATION);
         }
 
 
