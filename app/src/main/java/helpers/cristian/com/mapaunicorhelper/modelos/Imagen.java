@@ -14,20 +14,17 @@ public class Imagen implements BaseModelo {
     private String url;
     private String fecha;
     private String estado;
-    private Posicion posicion;
 
-    public Imagen(String url, String fecha, Posicion posicion, String estado) {
+    public Imagen(String url, String fecha, String estado) {
         this.url = url;
         this.fecha = fecha;
-        this.posicion = posicion;
         this.estado = estado;
     }
 
-    public Imagen(int id, String url, String fecha, Posicion posicion, String estado) {
+    public Imagen(int id, String url, String fecha, String estado) {
         this.id = id;
         this.url = url;
         this.fecha = fecha;
-        this.posicion = posicion;
         this.estado = estado;
     }
 
@@ -38,8 +35,6 @@ public class Imagen implements BaseModelo {
         values.put(URL, url);
         values.put(FECHA_TOMADA, fecha);
         values.put(ESTADO, estado);
-        if( posicion != null)
-            values.put(ID_POSICION, posicion.getId());
 
         return values;
     }
@@ -77,13 +72,5 @@ public class Imagen implements BaseModelo {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public Posicion getPosicion() {
-        return posicion;
-    }
-
-    public void setPosicion(Posicion posicion) {
-        this.posicion = posicion;
     }
 }

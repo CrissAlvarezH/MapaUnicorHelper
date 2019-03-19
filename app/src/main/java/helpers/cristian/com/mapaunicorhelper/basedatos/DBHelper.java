@@ -78,9 +78,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 URL + " TEXT NOT NULL, " +
                 FECHA_TOMADA + " TEXT NOT NULL, " +
-                ESTADO + " TEXT NOT NULL, " +// Campo solo para la app, para saber si fue enviada al servidor
-                ID_POSICION + " INTEGER, " + // Para los salones no tendrá posicion
-                "FOREIGN KEY("+ID_POSICION+") REFERENCES "+TABLA_POSICIONES+"("+ID+") " +
+                ESTADO + " TEXT NOT NULL " +// Campo solo para la app, para saber si fue enviada al servidor
                 ");";
 
         String CREAR_TABLA_ZONA = "CREATE TABLE "+TABLA_ZONAS+" ( " +

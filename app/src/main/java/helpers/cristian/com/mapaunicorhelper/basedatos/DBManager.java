@@ -177,7 +177,6 @@ public class DBManager {
                                 cImg.getInt( cImg.getColumnIndex(ID) ),
                                 cImg.getString( cImg.getColumnIndex(URL) ),
                                 cImg.getString( cImg.getColumnIndex(FECHA_TOMADA) ),
-                                null,
                                 cImg.getString( cImg.getColumnIndex(ESTADO) )
                         );
 
@@ -224,7 +223,6 @@ public class DBManager {
                                     cimgs.getInt( cimgs.getColumnIndex(ID) ),
                                     cimgs.getString( cimgs.getColumnIndex(URL) ),
                                     cimgs.getString( cimgs.getColumnIndex(FECHA_TOMADA) ),
-                                    null,
                                     cimgs.getString( cimgs.getColumnIndex(ESTADO) )
                             ));
                         }
@@ -303,7 +301,6 @@ public class DBManager {
                                         cImgs.getInt( cImgs.getColumnIndex(ID) ),
                                         cImgs.getString( cImgs.getColumnIndex(URL) ),
                                         cImgs.getString( cImgs.getColumnIndex(FECHA_TOMADA) ),
-                                        pos,
                                         cImgs.getString( cImgs.getColumnIndex(ESTADO) )
                                 );
 

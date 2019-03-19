@@ -536,7 +536,6 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     Imagen imagenG = new Imagen(
                             rutaImg,
                             ahora,
-                            posicionBloque,
                             Imagen.Estados.NO_ENVIADA
                     );
 
@@ -566,7 +565,6 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     Imagen imagenC = new Imagen(
                             rutaImg,
                             ahora,
-                            posicionBloque,
                             Imagen.Estados.NO_ENVIADA
                     );
 
@@ -595,7 +593,6 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     imagenSalon = new Imagen(
                             rutaImg,
                             ahora,
-                            null,// Esta imagen solo está asociada al salón
                             Imagen.Estados.NO_ENVIADA
                     );
 
@@ -613,7 +610,6 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                     imagenSalon = new Imagen(
                             rutaImg,
                             ahora,
-                            null,// Esta imagen solo está asociada al salón,
                             Imagen.Estados.NO_ENVIADA
                     );
 
