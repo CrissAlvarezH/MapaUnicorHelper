@@ -13,10 +13,11 @@ import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.TABLA_SAL
 public class Salon implements BaseModelo, Serializable {
 
     private int id;
+    private int idServer;
     private int piso;
     private String nombre;
     private String codigo;
-    private Bloque bloque;
+    private transient Bloque bloque;
     private Imagen imagen;
 
     public Salon(String nombre, String codigo, Bloque bloque, int piso, Imagen imagen) {
@@ -51,6 +52,14 @@ public class Salon implements BaseModelo, Serializable {
     @Override
     public String getNombreTabla() {
         return TABLA_SALONES;
+    }
+
+    public int getIdServer() {
+        return idServer;
+    }
+
+    public void setIdServer(int idServer) {
+        this.idServer = idServer;
     }
 
     public int getId() {

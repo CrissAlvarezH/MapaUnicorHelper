@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -24,6 +25,7 @@ import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_IMAGEN
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_POSICION;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_RUTA;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_SALON;
+import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_SERVER;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.ID_ZONA;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.LATITUD;
 import static helpers.cristian.com.mapaunicorhelper.basedatos.DBHelper.LONGITUD;
@@ -59,6 +61,230 @@ public class DBManager {
         db = dbHelper.getWritableDatabase();
 
         return db.update(modelo.getNombreTabla(), modelo.toContentValues(), where, args);
+    }
+
+    public void marcarImagenEnviada(Imagen imagen) {
+        db = dbHelper.getWritableDatabase();
+
+
+        db.execSQL(
+                "UPDATE " + TABLA_IMAGENES + " SET " + ESTADO + " = ? WHERE " + ID + " = ?",
+                new String[]{Imagen.Estados.ENVIADA, imagen.getId() + ""}
+        );
+
+    }
+
+    public void marcarBloqueEnviado(Bloque bloque, ArrayList<Salon> salones) {
+        db = dbHelper.getWritableDatabase();
+
+        db.execSQL(
+                "UPDATE "+TABLA_BLOQUES + " SET " +ESTADO+" = ?, "+ID_SERVER+" = ?",
+                new String[] { Bloque.Estados.ENVIADO, bloque.getIdServer()+"" }
+        );
+
+        if ( salones != null ) {
+            for (Salon salon : salones) {
+                db.execSQL(
+                        "UPDATE " + TABLA_SALONES + " SET " + ID_SERVER + " = ?",
+                        new String[]{salon.getIdServer() + ""}
+                );
+            }
+        } else {
+            Log.v("PRUEBA", "Salones es nulo");
+        }
+    }
+
+    public ArrayList<Imagen> getImagenesNoEnviadas() {
+        db = dbHelper.getReadableDatabase();
+
+        ArrayList<Imagen> imagenes = new ArrayList<>();
+
+        // Solo enviamos imagenes de bloques enviados porque estos ya tienen el id del server
+        Cursor imgBloques = db.rawQuery(
+                "SELECT " + TABLA_IMAGENES + ".*, "+TABLA_BLOQUES+"."+ID_SERVER+" AS id_bloque_server " +
+                        ", "+TABLA_BLOQUES+"."+ID+" AS id_bloque" +
+                        " FROM "+TABLA_IMAGEN_BLOQUE+", "+TABLA_IMAGENES +", "+TABLA_BLOQUES+
+                        " WHERE "+TABLA_IMAGEN_BLOQUE+"."+ID_BLOQUE+" = "+TABLA_BLOQUES+"."+ID +
+                        " AND "+TABLA_IMAGEN_BLOQUE+"."+ID_IMAGEN+" = "+TABLA_IMAGENES+"."+ID+
+                        " AND "+TABLA_IMAGENES+"."+ESTADO+" = ?",
+                new String[] { Imagen.Estados.NO_ENVIADA }
+        );
+
+        if ( imgBloques.moveToFirst() ) {
+            do {
+
+                Imagen imagen = new Imagen(
+                        imgBloques.getInt( imgBloques.getColumnIndex(ID) ),
+                        imgBloques.getString( imgBloques.getColumnIndex(URL) ),
+                        imgBloques.getString( imgBloques.getColumnIndex(FECHA_TOMADA) ),
+                        imgBloques.getString( imgBloques.getColumnIndex(ESTADO) )
+                );
+
+                int idBloqueServer = imgBloques.getInt( imgBloques.getColumnIndex("id_bloque_server") );
+
+
+                imagen.setDe( Imagen.De.BLOQUE );
+                imagen.setIdRelacion( idBloqueServer );
+
+                imagenes.add(imagen);
+
+                int idBloque = imgBloques.getInt( imgBloques.getColumnIndex("id_bloque") );
+
+                // Agregamos las imagenes del bloque
+                Cursor imgSalones = db.rawQuery(
+                        "SELECT " + TABLA_IMAGENES + ".*, "+TABLA_SALONES+"."+ID_SERVER+" AS id_salon " +
+                                " FROM "+TABLA_IMAGEN_SALON+", "+TABLA_IMAGENES +","+TABLA_SALONES+
+                                " WHERE "+TABLA_IMAGEN_SALON+"."+ID_SALON+" = "+TABLA_SALONES+"."+ID+
+                                " AND "+TABLA_IMAGEN_SALON+"."+ID_IMAGEN+" = "+TABLA_IMAGENES+"."+ID+
+                                " AND "+TABLA_SALONES+"."+ID_BLOQUE+"=? "+
+                                " AND "+TABLA_IMAGENES+"."+ESTADO+" = ?",
+                        new String[] { idBloque+"", Imagen.Estados.NO_ENVIADA }
+                );
+
+                if ( imgSalones.moveToFirst() ) {
+                    do {
+
+                        Imagen imagenSalon = new Imagen(
+                                imgSalones.getInt( imgSalones.getColumnIndex(ID) ),
+                                imgSalones.getString( imgSalones.getColumnIndex(URL) ),
+                                imgSalones.getString( imgSalones.getColumnIndex(FECHA_TOMADA) ),
+                                imgSalones.getString( imgSalones.getColumnIndex(ESTADO) )
+                        );
+
+                        imagenSalon.setDe( Imagen.De.BLOQUE );
+                        imagenSalon.setIdRelacion( imgSalones.getInt( imgSalones.getColumnIndex("id_salon") ) );
+
+                        imagenes.add(imagenSalon);
+                    } while ( imgSalones.moveToNext() );
+                }
+
+                imgSalones.close();
+
+            } while ( imgBloques.moveToNext() );
+        }
+
+        imgBloques.close();
+
+
+
+        return imagenes;
+    }
+
+    public ArrayList<Imagen> getImagenesParaEnviar() {
+        db = dbHelper.getReadableDatabase();
+
+        ArrayList<Imagen> imagenes = new ArrayList<>();
+
+        // Solo enviamos imagenes de bloques enviados porque estos ya tienen el id del server
+        Cursor imgBloques = db.rawQuery(
+                "SELECT " + TABLA_IMAGENES + ".*, "+TABLA_BLOQUES+"."+ID_SERVER+" AS id_bloque_server " +
+                        ", "+TABLA_BLOQUES+"."+ID+" AS id_bloque" +
+                        " FROM "+TABLA_IMAGEN_BLOQUE+", "+TABLA_IMAGENES +", "+TABLA_BLOQUES+
+                        " WHERE "+TABLA_IMAGEN_BLOQUE+"."+ID_BLOQUE+" = "+TABLA_BLOQUES+"."+ID +
+                        " AND "+TABLA_IMAGEN_BLOQUE+"."+ID_IMAGEN+" = "+TABLA_IMAGENES+"."+ID+
+                        " AND "+TABLA_IMAGENES+"."+ESTADO+" = ?"+
+                        " AND "+TABLA_BLOQUES+"."+ESTADO+" = ?",
+                new String[] { Imagen.Estados.NO_ENVIADA, Bloque.Estados.ENVIADO }
+        );
+
+        if ( imgBloques.moveToFirst() ) {
+            do {
+
+                Imagen imagen = new Imagen(
+                        imgBloques.getInt( imgBloques.getColumnIndex(ID) ),
+                        imgBloques.getString( imgBloques.getColumnIndex(URL) ),
+                        imgBloques.getString( imgBloques.getColumnIndex(FECHA_TOMADA) ),
+                        imgBloques.getString( imgBloques.getColumnIndex(ESTADO) )
+                );
+
+                int idBloqueServer = imgBloques.getInt( imgBloques.getColumnIndex("id_bloque_server") );
+
+
+                imagen.setDe( Imagen.De.BLOQUE );
+                imagen.setIdRelacion( idBloqueServer );
+
+                imagenes.add(imagen);
+
+                int idBloque = imgBloques.getInt( imgBloques.getColumnIndex("id_bloque") );
+
+
+                // Agregamos las imagenes del bloque
+                Cursor imgSalones = db.rawQuery(
+                        "SELECT " + TABLA_IMAGENES+ ".*, "+TABLA_SALONES+"."+ID_SERVER+" AS id_salon " +
+                                " FROM "+TABLA_IMAGEN_SALON+", "+TABLA_IMAGENES +","+TABLA_SALONES+
+                                " WHERE "+TABLA_IMAGEN_SALON+"."+ID_SALON+" = "+TABLA_SALONES+"."+ID+
+                                " AND "+TABLA_IMAGEN_SALON+"."+ID_IMAGEN+" = "+TABLA_IMAGENES+"."+ID+
+                                " AND "+TABLA_SALONES+"."+ID_BLOQUE+"=? "+
+                                " AND "+TABLA_IMAGENES+"."+ESTADO+" = ?",
+                        new String[] { idBloque+"", Imagen.Estados.NO_ENVIADA }
+                );
+
+                if ( imgSalones.moveToFirst() ) {
+                    do {
+
+                        Imagen imagenSalon = new Imagen(
+                                imgSalones.getInt( imgSalones.getColumnIndex(ID) ),
+                                imgSalones.getString( imgSalones.getColumnIndex(URL) ),
+                                imgSalones.getString( imgSalones.getColumnIndex(FECHA_TOMADA) ),
+                                imgSalones.getString( imgSalones.getColumnIndex(ESTADO) )
+                        );
+
+                        imagenSalon.setDe( Imagen.De.SALON );
+                        imagenSalon.setIdRelacion( imgSalones.getInt( imgSalones.getColumnIndex("id_salon") ) );
+
+                        imagenes.add(imagenSalon);
+                    } while ( imgSalones.moveToNext() );
+                }
+
+                imgSalones.close();
+
+            } while ( imgBloques.moveToNext() );
+        }
+
+        imgBloques.close();
+
+
+
+        return imagenes;
+    }
+
+    public ArrayList<Bloque> getBloqueInfo() {
+        db = dbHelper.getReadableDatabase();
+
+        Cursor cur = db.query(TABLA_BLOQUES, null, null, null, null, null, null);
+
+        ArrayList<Bloque> bloques = new ArrayList<>();
+
+        if (cur.moveToFirst()) {
+            do {
+                Bloque bloque = new Bloque();
+
+                bloque.setId(cur.getInt(cur.getColumnIndex(ID)));
+                bloque.setNombre(cur.getString(cur.getColumnIndex(NOMBRE)));
+                bloque.setCodigo(cur.getString(cur.getColumnIndex(CODIGO)));
+                bloque.setZona(new Zona(cur.getInt(cur.getColumnIndex(ID_ZONA)), ""));
+                bloque.setEstado(cur.getString(cur.getColumnIndex(ESTADO)));
+
+                // Agregamos los salones
+                Cursor cSalon = db.rawQuery(
+                        "SELECT COUNT(*) FROM "+TABLA_SALONES+" WHERE "+ID_BLOQUE+" = ?",
+                        new String[] { bloque.getId() + "" }
+                );
+
+                if ( cSalon.moveToFirst() ) {
+                    bloque.setNumSalones( cSalon.getInt(0) );
+                }
+
+                cSalon.close();
+
+                bloques.add(bloque);
+
+            } while (cur.moveToNext());
+        }
+
+        cur.close();
+
+        return bloques;
     }
 
     public void ejecutarSql(String sql, String[] args){
@@ -141,6 +367,8 @@ public class DBManager {
                 bloque.setId( cur.getInt( cur.getColumnIndex(ID) ) );
                 bloque.setNombre( cur.getString( cur.getColumnIndex(NOMBRE) ) );
                 bloque.setCodigo( cur.getString( cur.getColumnIndex(CODIGO) ) );
+                bloque.setEstado( cur.getString( cur.getColumnIndex(ESTADO) ) );
+                bloque.setIdZona( cur.getInt( cur.getColumnIndex(ID_ZONA) ) );
                 bloque.setZona( new Zona( cur.getInt( cur.getColumnIndex(ID_ZONA) ), "" ) );
 
                 // Agregamos la posicion del bloque

@@ -357,7 +357,7 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                                 Salon salon = new Salon(
                                         nombre,
                                         cod,
-                                        new Bloque(idBloqueParam, null, null, null, null),
+                                        new Bloque(idBloqueParam, null, null, null, null, Bloque.Estados.NO_ENVIADO),
                                         piso,
                                         imagenSalon
                                 );
@@ -430,7 +430,8 @@ public class AddBloqueActivity extends AppCompatActivity implements View.OnClick
                 edtNombre.getText().toString().trim(),
                 edtCodigo.getText().toString().trim(),
                 new Zona( spnZona.getSelectedItemPosition(), "" ), // solo importa el id
-                posicionBloque
+                posicionBloque,
+                Bloque.Estados.NO_ENVIADO
         );
 
         // Insertamos el bloque

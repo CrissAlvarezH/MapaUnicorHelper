@@ -14,6 +14,8 @@ public class Imagen implements BaseModelo {
     private String url;
     private String fecha;
     private String estado;
+    private String de;
+    private int idRelacion; // id del bloque o el salon al que pertenece la imagen
 
     public Imagen(String url, String fecha, String estado) {
         this.url = url;
@@ -26,6 +28,11 @@ public class Imagen implements BaseModelo {
         this.url = url;
         this.fecha = fecha;
         this.estado = estado;
+    }
+
+    public interface De {
+        String SALON = "salon";
+        String BLOQUE = "bloque";
     }
 
     @Override
@@ -48,6 +55,30 @@ public class Imagen implements BaseModelo {
         String NO_ENVIADA = "no_enviada";
         String ENVIADA = "enviada";
         String RUTA_NULA = "ruta_null";
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getDe() {
+        return de;
+    }
+
+    public void setDe(String de) {
+        this.de = de;
+    }
+
+    public int getIdRelacion() {
+        return idRelacion;
+    }
+
+    public void setIdRelacion(int idRelacion) {
+        this.idRelacion = idRelacion;
     }
 
     public String getUrl() {

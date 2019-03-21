@@ -1,7 +1,10 @@
 package helpers.cristian.com.mapaunicorhelper;
 
 import android.Manifest;
-import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,11 +15,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -34,7 +35,9 @@ import java.util.ArrayList;
 
 import helpers.cristian.com.mapaunicorhelper.fragmentos.BloquesFragment;
 import helpers.cristian.com.mapaunicorhelper.fragmentos.RutasFragment;
-import helpers.cristian.com.mapaunicorhelper.fragmentos.SalonesFragment;
+import helpers.cristian.com.mapaunicorhelper.fragmentos.InfoFragment;
+import helpers.cristian.com.mapaunicorhelper.modelos.Bloque;
+import helpers.cristian.com.mapaunicorhelper.utils.Constantes;
 
 public class MainActivity extends FragmentActivity {
     private final String TAG = "ActividadMain";
@@ -50,6 +53,8 @@ public class MainActivity extends FragmentActivity {
 
     private ArrayList<ListenerPosiciones> listenerPosiciones = new ArrayList<>();
     private PosicionesCallback posicionesCallbak;
+    private LocationRequest locationRequest;
+    private MiReceiver miReceiver;
 
     public interface ListenerPosiciones {
         void cambioPosicion(LatLng posicion);
@@ -61,6 +66,18 @@ public class MainActivity extends FragmentActivity {
 
     public void removerListenerPosicion(ListenerPosiciones listener){
         this.listenerPosiciones.remove(listener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction( Constantes.Acciones.ACTUALIZAR_BLOQUES );
+        intentFilter.addAction( Constantes.Acciones.ACTUALIZAR_IMGS );
+
+        miReceiver = new MiReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(miReceiver, intentFilter);
     }
 
     @Override
@@ -76,7 +93,7 @@ public class MainActivity extends FragmentActivity {
 
         clientePosiciones = LocationServices.getFusedLocationProviderClient(this);
 
-        LocationRequest locationRequest = new LocationRequest();
+        locationRequest = new LocationRequest();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setFastestInterval(0);
         locationRequest.setInterval(0);
@@ -86,7 +103,7 @@ public class MainActivity extends FragmentActivity {
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             Toast.makeText(this, "Debes conseder los permisos", Toast.LENGTH_SHORT).show();
-            validarPermisos();
+            validarPermisos(true);
         }else{
             posicionesCallbak = new PosicionesCallback();
             clientePosiciones.requestLocationUpdates(locationRequest, posicionesCallbak, null);
@@ -101,7 +118,7 @@ public class MainActivity extends FragmentActivity {
 
         pagerAdaptador.agregarFragment(new BloquesFragment(), "BLOQUES");
         pagerAdaptador.agregarFragment(new RutasFragment(), "RUTAS");
-        pagerAdaptador.agregarFragment(new SalonesFragment(), "MAPA");
+        pagerAdaptador.agregarFragment(new InfoFragment(), "INFO");
 
         viewPager.setAdapter(pagerAdaptador);
         tabs.setupWithViewPager(viewPager);
@@ -186,7 +203,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    public boolean validarPermisos(){
+    public boolean validarPermisos(boolean pedirlos){
         boolean todosConsedidos = true;
         ArrayList<String> permisosFaltantes = new ArrayList<>();
 
@@ -209,7 +226,7 @@ public class MainActivity extends FragmentActivity {
         }
 
 
-        if(!todosConsedidos){
+        if(!todosConsedidos && pedirlos){
             String [] permisosArray = new String[permisosFaltantes.size()];
             permisosArray = permisosFaltantes.toArray(permisosArray);
 
@@ -224,8 +241,63 @@ public class MainActivity extends FragmentActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if(requestCode == codPermisos) {
-            validarPermisos();
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                validarPermisos(true);
+
+
+            } else {
+                posicionesCallbak = new PosicionesCallback();
+                clientePosiciones.requestLocationUpdates(locationRequest, posicionesCallbak, null);
+            }
+
         }
+    }
+
+    private class MiReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ( intent != null && intent.getAction() != null ) {
+                switch ( intent.getAction() ) {
+                    case Constantes
+                            .Acciones.ACTUALIZAR_BLOQUES:
+
+                        try {
+
+                            InfoFragment infoFragment = (InfoFragment) pagerAdaptador.getItem(2);
+
+                            infoFragment.refreshBloques();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        break;
+                    case Constantes.Acciones.ACTUALIZAR_IMGS:
+
+                        try {
+
+                            InfoFragment infoFragment = (InfoFragment) pagerAdaptador.getItem(2);
+
+                            infoFragment.refreshImgs();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        break;
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if ( miReceiver != null ) LocalBroadcastManager.getInstance(this).unregisterReceiver(miReceiver);
     }
 
     @Override

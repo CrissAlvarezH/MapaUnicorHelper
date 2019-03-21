@@ -43,6 +43,8 @@
                 android:resource="@xml/rutas" />
         </provider>
 
+        <service
+            android:name=".servicios.EnviarInfoService"></service>
     </application>
 
 </manifest>

@@ -9,11 +9,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-
 import java.util.ArrayList;
 
 import helpers.cristian.com.mapaunicorhelper.R;
+import helpers.cristian.com.mapaunicorhelper.glide.GlideApp;
 import helpers.cristian.com.mapaunicorhelper.modelos.Imagen;
 
 public class ImagenAdapter extends RecyclerView.Adapter<ImagenAdapter.ImagenViewHolder>{
@@ -54,7 +53,7 @@ public class ImagenAdapter extends RecyclerView.Adapter<ImagenAdapter.ImagenView
         }
 
         public void setImg(String ruta){
-            Glide.with(contexto)
+            GlideApp.with(contexto)
                     .load(ruta)
                     .into(img);
         }
