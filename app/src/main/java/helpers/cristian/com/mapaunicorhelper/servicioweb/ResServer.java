@@ -8,7 +8,25 @@ import helpers.cristian.com.mapaunicorhelper.modelos.Salon;
 public class ResServer {
     private boolean okay;
     private ArrayList<Salon> salones;
+    private ArrayList<Bloque> bloques;
     private Bloque bloque;
+    private String error;
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public ArrayList<Bloque> getBloques() {
+        return bloques;
+    }
+
+    public void setBloques(ArrayList<Bloque> bloques) {
+        this.bloques = bloques;
+    }
 
     public Bloque getBloque() {
         return bloque;

@@ -43,8 +43,9 @@
                 android:resource="@xml/rutas" />
         </provider>
 
-        <service
-            android:name=".servicios.EnviarInfoService"></service>
+        <service android:name=".servicios.EnviarInfoService" />
+
+        <activity android:name=".SetUbicacionActivity"></activity>
     </application>
 
 </manifest>

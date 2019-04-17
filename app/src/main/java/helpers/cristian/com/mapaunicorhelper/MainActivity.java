@@ -34,9 +34,9 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 
 import helpers.cristian.com.mapaunicorhelper.fragmentos.BloquesFragment;
+import helpers.cristian.com.mapaunicorhelper.fragmentos.BloquesMapaFragment;
 import helpers.cristian.com.mapaunicorhelper.fragmentos.RutasFragment;
 import helpers.cristian.com.mapaunicorhelper.fragmentos.InfoFragment;
-import helpers.cristian.com.mapaunicorhelper.modelos.Bloque;
 import helpers.cristian.com.mapaunicorhelper.utils.Constantes;
 
 public class MainActivity extends FragmentActivity {
@@ -117,8 +117,6 @@ public class MainActivity extends FragmentActivity {
         pagerAdaptador = new PagerAdaptador(getSupportFragmentManager());
 
         pagerAdaptador.agregarFragment(new BloquesFragment(), "BLOQUES");
-        pagerAdaptador.agregarFragment(new RutasFragment(), "RUTAS");
-        pagerAdaptador.agregarFragment(new InfoFragment(), "INFO");
 
         viewPager.setAdapter(pagerAdaptador);
         tabs.setupWithViewPager(viewPager);

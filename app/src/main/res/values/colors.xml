@@ -6,5 +6,11 @@
 
     <color name="blanco">#FFF</color>
     <color name="gris_claro">#e7e4e4</color>
+    <color name="verde">#049704</color>
+    <color name="azul">#0b0497</color>
+    <color name="morado">#97048b</color>
+    <color name="rojo">#970429</color>
+    <color name="naranja">#978604</color>
     <color name="negro_semitransparente">#3c000000</color>
+    <color name="negro_semitransparente_oscuro">#97565656</color>
 </resources>
