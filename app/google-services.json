@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "379775424140",
+    "firebase_url": "https://mapahelperapp.firebaseio.com",
+    "project_id": "mapahelperapp",
+    "storage_bucket": "mapahelperapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:379775424140:android:f7d48211aa2a7ffb",
+        "android_client_info": {
+          "package_name": "helpers.cristian.com.mapaunicorhelper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "379775424140-gn2unnt38voina8tcnpoch0a7ar2gctt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDR7wiVxtcJbbvM4oUL_ewnO6S2p9ZIwWg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "379775424140-gn2unnt38voina8tcnpoch0a7ar2gctt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
