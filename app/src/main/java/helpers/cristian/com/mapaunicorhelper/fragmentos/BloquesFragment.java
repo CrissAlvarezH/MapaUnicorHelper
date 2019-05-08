@@ -1,9 +1,12 @@
 package helpers.cristian.com.mapaunicorhelper.fragmentos;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,6 +17,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import helpers.cristian.com.mapaunicorhelper.R;
+import helpers.cristian.com.mapaunicorhelper.SetImgBloqueActivity;
 import helpers.cristian.com.mapaunicorhelper.SetUbicacionActivity;
 import helpers.cristian.com.mapaunicorhelper.adaptadores.BloquePosAdapter;
 import helpers.cristian.com.mapaunicorhelper.modelos.Bloque;
@@ -61,11 +65,40 @@ public class BloquesFragment extends Fragment implements BloquePosAdapter.Bloque
     }
 
     @Override
-    public void clickBloque(Bloque bloque, int posicion) {
-        Intent intent = new Intent(getContext(), SetUbicacionActivity.class);
-        intent.putExtra("id_bloque", bloque.getId());
+    public void clickBloque(final Bloque bloque, int posicion) {
 
-        startActivityForResult(intent, COD_SET_UBICACION);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Bloque "+bloque.getCodigo())
+                .setItems(R.array.opciones_bloque, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        switch (which) {
+                            case 0:
+
+                                Intent intent = new Intent(getContext(), SetUbicacionActivity.class);
+                                intent.putExtra("id_bloque", bloque.getId());
+
+                                startActivityForResult(intent, COD_SET_UBICACION);
+
+                                break;
+                            case 1:
+
+                                Intent intentImgs = new Intent(getContext(), SetImgBloqueActivity.class);
+                                intentImgs.putExtra("num_bloque", bloque.getId());
+
+                                startActivity(intentImgs);
+
+                                break;
+                        }
+
+                    }
+                });
+        Dialog dialog = builder.create();
+
+        if ( !getActivity().isFinishing() )
+            dialog.show();
+
+
     }
 
     private void refreshBloques() {

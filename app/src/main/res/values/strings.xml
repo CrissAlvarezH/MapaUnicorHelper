@@ -11,4 +11,9 @@
         <item>Zona C</item>
         <item>Zona D</item>
     </string-array>
+
+    <string-array name="opciones_bloque">
+        <item>Establecer ubicación</item>
+        <item>Agregar imagenes</item>
+    </string-array>
 </resources>

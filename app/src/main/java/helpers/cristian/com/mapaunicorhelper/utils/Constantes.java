@@ -3,7 +3,7 @@ package helpers.cristian.com.mapaunicorhelper.utils;
 public class Constantes {
 
     public interface URLs {
-        String BASE_URL = "http://142.93.71.94:4400/";
+        String BASE_URL = "http://192.168.0.29:4400/"; // Produccion: http://142.93.71.94:4400/
         String ENVIAR_IMGS = "imagenes/insertar";
         String ENVIAR_BLOQUES = "bloques/insertar";
         String BLOQUES = "bloques";
