@@ -9,6 +9,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Path;
 
 public interface ServicioWeb {
 
@@ -17,6 +18,9 @@ public interface ServicioWeb {
 
     @GET(Constantes.URLs.BLOQUES)
     Call<ResServer> pedirTodosLosBloques();
+
+    @GET(Constantes.URLs.BLOQUES_ID)
+    Call<ResServer> pedirUnBloque(@Path("id") int idBloque);
 
     @FormUrlEncoded
     @PUT(Constantes.URLs.BLOQUES_UPDATE_POS)

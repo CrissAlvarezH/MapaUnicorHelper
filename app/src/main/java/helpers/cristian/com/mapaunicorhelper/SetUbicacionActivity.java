@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.List;
 import java.util.Locale;
 
+import helpers.cristian.com.mapaunicorhelper.modelos.Bloque;
 import helpers.cristian.com.mapaunicorhelper.modelos.Posicion;
 import helpers.cristian.com.mapaunicorhelper.servicioweb.ResServer;
 import helpers.cristian.com.mapaunicorhelper.servicioweb.ServicioWeb;
@@ -67,6 +68,7 @@ public class SetUbicacionActivity extends AppCompatActivity implements OnMapRead
     private int idBloque;
     private ProgressBar progressSetPos;
     private ServicioWeb servicioWeb;
+    private LinearLayout layoutCargandoUbicacion;
 
     @Override
     protected void onResume() {
@@ -91,6 +93,7 @@ public class SetUbicacionActivity extends AppCompatActivity implements OnMapRead
         imgMarcadorEstatico = findViewById(R.id.img_marcador_estatico);
         layoutIrMiUbicacion = findViewById(R.id.layout_ir_mi_ubicacion);
         btnIrMiUbicacion = findViewById(R.id.btn_ir_mi_ubicacion);
+        layoutCargandoUbicacion = findViewById(R.id.layout_cargando_ubicacion);
 
         mapFrament.getMapAsync(this);
         btnCancelar.setOnClickListener(this);
@@ -99,6 +102,8 @@ public class SetUbicacionActivity extends AppCompatActivity implements OnMapRead
         btnIrMiUbicacion.setOnClickListener(this);
 
         servicioWeb = ServicioWebUtils.getServicioWeb(true);
+
+        pedirUbicacionAntigua(idBloque);
     }
 
     @Override
@@ -299,6 +304,52 @@ public class SetUbicacionActivity extends AppCompatActivity implements OnMapRead
                 btnSetUbicacion.setVisibility(View.VISIBLE);
 
                 Toast.makeText(SetUbicacionActivity.this, "Error al actualizar la posicion", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void pedirUbicacionAntigua( int id ) {
+        layoutCargandoUbicacion.setVisibility(View.VISIBLE);
+
+        Call<ResServer> resServerCall = servicioWeb.pedirUnBloque(id);
+
+        resServerCall.enqueue(new Callback<ResServer>() {
+            @Override
+            public void onResponse(Call<ResServer> call, Response<ResServer> response) {
+
+                if ( response.isSuccessful() ) {
+                    ResServer resServer = response.body();
+
+                    // La posicion 19 es temporal
+                    if ( resServer != null && resServer.isOkay() && resServer.getBloque().getIdPosicion() != 19 ) {
+
+                        if ( mapa != null ) {
+                            Posicion posicion = resServer.getBloque().getPosicion();
+
+                            mapa.animateCamera(
+                                    CameraUpdateFactory.newLatLngZoom(
+                                            new LatLng(
+                                                    posicion.getLatitud(),
+                                                    posicion.getLongitud()
+                                            ),
+                                            18f
+                                    )
+                            );
+                        }
+
+                    } else {
+                        Toast.makeText(SetUbicacionActivity.this, "El bloque no tiene posición actualmente", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                layoutCargandoUbicacion.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFailure(Call<ResServer> call, Throwable t) {
+                layoutCargandoUbicacion.setVisibility(View.GONE);
+
+                Toast.makeText(SetUbicacionActivity.this, "No se pudo cargar la posición actual del bloque", Toast.LENGTH_SHORT).show();
             }
         });
     }
