@@ -84,7 +84,7 @@ public class BloquesFragment extends Fragment implements BloquePosAdapter.Bloque
                             case 1:
 
                                 Intent intentImgs = new Intent(getContext(), SetImgBloqueActivity.class);
-                                intentImgs.putExtra("num_bloque", bloque.getId());
+                                intentImgs.putExtra("num_bloque", Integer.parseInt( bloque.getCodigo() ) );
 
                                 startActivity(intentImgs);
 

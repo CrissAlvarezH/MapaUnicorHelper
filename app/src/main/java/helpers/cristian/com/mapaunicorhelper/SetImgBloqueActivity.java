@@ -21,6 +21,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -90,6 +92,19 @@ public class SetImgBloqueActivity extends AppCompatActivity implements View.OnCl
         btnAddImg2.setOnClickListener(this);
         btnAddImg3.setOnClickListener(this);
         btnEnviar.setOnClickListener(this);
+
+        // Colocamos las imagenes del bloque en caso de que ya las tenga
+        Glide.with(this)
+                .load("http://142.93.71.94/imagenes_unicor/bloques/"+numBloque+"/1.jpg")
+                .into( img1 );
+
+        Glide.with(this)
+                .load("http://142.93.71.94/imagenes_unicor/bloques/"+numBloque+"/2.jpg")
+                .into( img2 );
+
+        Glide.with(this)
+                .load("http://142.93.71.94/imagenes_unicor/bloques/"+numBloque+"/3.jpg")
+                .into( img3 );
     }
 
     @Override
