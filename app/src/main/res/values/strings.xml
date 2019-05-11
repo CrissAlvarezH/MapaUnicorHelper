@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">MapaUnicorHelper</string>
+    <string name="app_name">Mapa Unicor Helper</string>
+
+    <string name="key_goole_maps_produccion">AIzaSyAgjkK4L0rX0C1u8W0SDIXdxwFDSbJRGWg</string>
+    <string name="key_goole_maps_desarrollo">AIzaSyBYalb30VcHT8tNyWOZ0PuagQZu9pjdydM</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_mapa">Map</string>
