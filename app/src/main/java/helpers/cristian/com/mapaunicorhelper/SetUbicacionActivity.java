@@ -111,8 +111,17 @@ public class SetUbicacionActivity extends AppCompatActivity implements OnMapRead
         mapa = googleMap;
 
         // Inicialmente ubicamos en bogota
-        LatLng latLngBogota = new LatLng(4.0081794, -75.2522645);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngBogota, 5));
+        LatLng latLngUnicor = new LatLng(8.7892812,-75.8586953);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngUnicor, 16.5f));
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED && ActivityCompat
+                .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            mapa.setMyLocationEnabled(true);
+            mapa.getUiSettings().setMyLocationButtonEnabled(true);
+        }
+
 
         // Si es posible, se pone la imagen del marcador en la posicion actual del dispositivo
         if (locationManager != null && provider != null) {
@@ -121,7 +130,7 @@ public class SetUbicacionActivity extends AppCompatActivity implements OnMapRead
                 Location posActual = locationManager.getLastKnownLocation(provider);
 
                 if(posActual != null){
-                    googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom( new LatLng( posActual.getLatitude(), posActual.getLongitude() ), 15.5f ) );
+                    googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom( new LatLng( posActual.getLatitude(), posActual.getLongitude() ), 16.5f ) );
                 }
             }
         }

@@ -11,10 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Ocultamos el botón porque se usará el que trae Google Maps -->
     <LinearLayout
         android:id="@+id/layout_ir_mi_ubicacion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:background="@color/negro_semitransparente">
 
         <Button
